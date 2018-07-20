@@ -1,9 +1,4 @@
-#include <gmodule.h>
-
-#include "trace.h"
-#include "model.h"
-#include "coord.h"
-#include "commands.h"
+#include "default_trace.h"
 
 void calc_boundary_box(matrix_t *mdl, coord_t *minFull, coord_t *maxFull)
 {
@@ -84,7 +79,7 @@ void goto_next_pos(coord_t *curPos, coord_t nextPos, GArray *cmds)
 	*curPos = add_coords(*curPos, lld);
 }
 
-GArray exec_default_trace(matrix_t *mdl)
+GArray* exec_default_trace(matrix_t *mdl)
 {
 	GArray *cmds = g_array_new(FALSE, FALSE, sizeof(command_t));
 
@@ -124,4 +119,6 @@ GArray exec_default_trace(matrix_t *mdl)
 
 	// halt
 	add_cmd(cmds, halt_cmd());
+
+	return cmds;
 }

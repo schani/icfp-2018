@@ -72,6 +72,4 @@ is_nd(coord_t c){
     return (get_mlen(c) > 0 && get_mlen(c) <=2 && get_clen(c) == 1);
 }
 
-
-
 #endif /* _COORD_H */

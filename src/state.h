@@ -1,3 +1,6 @@
+#ifndef _STATE_H
+#define _STATE_H
+
 #include "trace.h"
 #include "model.h"
 
@@ -26,3 +29,5 @@ typedef struct {
 state_t make_state (void);
 
 bot_t make_bot (bid_t bid, coord_t pos, int n_seeds, bid_t *seeds);
+
+#endif /* _STATE_H */
