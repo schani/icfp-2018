@@ -1,6 +1,8 @@
 #ifndef _TRACE_H
 #define _TRACE_H
 
+#include <stdint.h>
+
 typedef enum {
     Halt,
     Wait,
@@ -14,14 +16,14 @@ typedef enum {
 } command_type_t;
 
 typedef struct {
-    int x, y, z;
+    int16_t x, y, z;
 } coord_t;
 
 typedef struct {
     command_type_t type;
     coord_t coord1;
     coord_t coord2;
-    int m;
+    uint8_t m;
 } command_t;
 
 #define SMove_lld coord1
