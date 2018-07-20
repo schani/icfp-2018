@@ -22,3 +22,5 @@ typedef struct {
     int n_bots;
     bot_t *bots;
 } state_t;
+
+state_t make_state (void);
