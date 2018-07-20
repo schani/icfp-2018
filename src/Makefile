@@ -1,6 +1,6 @@
 CPPFLAGS = -MD
 CC = gcc
-CFLAGS = -Werror -O2 -g
+CFLAGS = -Werror -O2 -std=c99 -g
 LDFLAGS =
 LDLIBS =
 
