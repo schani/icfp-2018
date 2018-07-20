@@ -1,0 +1,45 @@
+// One-pass algorithm with y-dimension-wise decomposition on a fixed grid per y coordinate
+
+fixedgrid():
+// pre: robot 1 in (0,0,0)
+// post: robot 1 in (0,0,0)
+    place_on_grid()
+    for k in {0..R-1}:
+        if floating necessary in next round:
+            Set harmonics to High
+        else:
+            Set harmonics to Low
+        for each robot r in {1..20}:
+            Scan local grid from top left to bottom right, filling voxels as needed, moving at max speed if possible
+            Then move back to local origin
+    gather_from_grid()
+    move_to_origin()
+
+
+place_on_grid():
+// pre: robot 1 in (0,0,0)
+// post: robots 1-20 on each of (i*R/5, 0, j*R/4) for i in {0..4} and j in {0..3}
+
+    code for robot r:
+        if r == 1:
+            // ALERT: the following code is sequential per robot
+            robot r splits (nd = (0,0,1), m = n-5)        // ALERT: n is local
+            robot r splits (nd = (1,0,0), m = 4)
+
+        if r was spawned with nd = (0,0,1):
+            // ALERT: the following code is sequential per robot
+            robot r moves up the grid (lld = (0,0,R/4 - 1))
+            robot r splits (nd = (0,0,1), m = n-5)        // ALERT: n is local
+            robot r splits (nd = (1,0,0), m = 4)
+
+        if r was spawned with nd = (1,0,0):
+            // ALERT: the following code is sequential per robot
+            robot r moves right on the grid (lld = (R/5 - 1,0,0))
+            robot r splits (nd = (1,0,0), m = n-1)        // ALERT: n is local
+
+
+gather_from_grid():
+// pre: robots 1-20 on each of (i*R/5, 0, j*R/4) for i in {0..4} and j in {0..3}
+// post: robot 1 in (0,0,0)
+
+    // inverse of place_on_grid()
