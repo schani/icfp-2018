@@ -5,6 +5,11 @@
 
 typedef uint8_t voxel_t;
 
+typedef enum {
+    Empty = 0,
+    Full = 1
+} voxel_state_t;
+
 typedef struct {
     int resolution;
     voxel_t *data;
