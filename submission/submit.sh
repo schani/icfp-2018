@@ -24,7 +24,8 @@ touch $DIR/$SHA
 ##### copy zipfile to server
 ## TODO: heinz please copy file to URL
 ## copy $DIR/$FILE to $URL
-
+# note: this will only work from inside tuwien
+scp $DIR/$FILE icfp2018@www.tilab.tuwien.ac.at:html/.
 
 ## TODO: remove echo
 echo "\
