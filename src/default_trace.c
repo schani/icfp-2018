@@ -1,3 +1,5 @@
+#include <gmodule.h>
+
 #include "trace.h"
 #include "model.h"
 
@@ -8,6 +10,7 @@ void set_coords(coord_t *c, int16_t x, int16_t y, int16_t z)
 	c->z = z;
 }
 
+// FIXME: rename to make_coord and make public
 coord_t create_coord(int16_t x, int16_t y, int16_t z)
 {
 	coord_t c;
@@ -20,48 +23,41 @@ coord_t create_coord(int16_t x, int16_t y, int16_t z)
 void calc_boundary_box(matrix_t *mdl, coord_t *minFull, coord_t *maxFull)
 {
 	uint8_t x = 0, y = 0, z = 0;
-	coord_t cur;
-	set_coords(minFull, mdl->resolution, mdl->resolution, mdl->resolution);
-	set_coords(maxFull, 0, 0, 0);
+	coord_t min = create_coord(0, 0, 0);
+	coord_t max = create_coord(mdl->resolution, mdl->resolution, mdl->resolution);
+	*minFull = max;
+	*maxFull = min;
+	region_t r = make_region(min, max);
 
-	for (y = 0; y < mdl->resolution; y++)
-	{
-		for (z = 0; z < mdl->resolution; z++)
+	FOR_EACH_COORD(cur, r) {
+		if (get_voxel(mdl, cur) == Full)
 		{
-			for (x = 0; x < mdl->resolution; x++)
+			if (cur.x < minFull->x)
 			{
-				set_coords(&cur, x, y, z);
-
-				if (get_voxel(mdl, cur) == Full)
-				{
-					if (cur.x < minFull->x)
-					{
-						minFull->x = cur.x;
-					}
-					if (cur.y < minFull->y)
-					{
-						minFull->y = cur.y;
-					}
-					if (cur.z < minFull->z)
-					{
-						minFull->z = cur.z;
-					}
-					if (cur.x > maxFull->x)
-					{
-						maxFull->x = cur.x;
-					}
-					if (cur.y > maxFull->y)
-					{
-						maxFull->y = cur.y;
-					}
-					if (cur.z > maxFull->z)
-					{
-						maxFull->z = cur.z;
-					}
-				}
+				minFull->x = cur.x;
+			}
+			if (cur.y < minFull->y)
+			{
+				minFull->y = cur.y;
+			}
+			if (cur.z < minFull->z)
+			{
+				minFull->z = cur.z;
+			}
+			if (cur.x > maxFull->x)
+			{
+				maxFull->x = cur.x;
+			}
+			if (cur.y > maxFull->y)
+			{
+				maxFull->y = cur.y;
+			}
+			if (cur.z > maxFull->z)
+			{
+				maxFull->z = cur.z;
 			}
 		}
-	}
+	} END_FOR_EACH_COORD;
 }
 
 void halt_cmd(command_t *cmds)
@@ -69,9 +65,13 @@ void halt_cmd(command_t *cmds)
 	// add command !
 }
 
-void fill_cmd(coord_t nd, command_t *cmds)
+command_t fill_cmd(coord_t nd)
 {
-	// add command !
+	command_t cmd;
+	cmd.type = Fill;
+	// FIXME: check nd
+	cmd.Fill_nd = nd;
+	return cmd;
 }
 
 void smove_cmd(coord_t *curPos, coord_t lld, command_t *cmds)
@@ -111,8 +111,15 @@ void goto_next_pos(coord_t *curPos, coord_t nextPos, command_t *cmds)
 	smove_cmd(curPos, lld, cmds);
 }
 
-void exec_default_trace(matrix_t *mdl, command_t *cmds)
+static void
+add_cmd (GArray *cmds, command_t cmd) {
+	g_array_append_val(cmds, cmd);
+}
+
+GArray exec_default_trace(matrix_t *mdl)
 {
+	GArray* cmds = g_array_new(FALSE, FALSE, sizeof(command_t));
+
 	// Calculate boundary box
 	coord_t minFull, maxFull;
 	calc_boundary_box(mdl, &minFull, &maxFull);
@@ -131,7 +138,7 @@ void exec_default_trace(matrix_t *mdl, command_t *cmds)
 				goto_next_pos(&curPos, create_coord(x, y, z), cmds);
 				if (get_voxel(mdl, curPos) == Full)
 				{
-					fill_cmd(create_coord(0, -1, 0), cmds);
+					add_cmd(cmds, fill_cmd(create_coord(0, -1, 0)));
 				}
 			}
 		}
