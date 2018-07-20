@@ -26,3 +26,6 @@ set_voxel (matrix_t *m, coord_t c, voxel_t v) {
 }
 
 matrix_t make_matrix(int resolution);
+
+matrix_t
+copy_matrix(matrix_t* from);
