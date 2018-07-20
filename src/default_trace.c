@@ -2,23 +2,8 @@
 
 #include "trace.h"
 #include "model.h"
-
-void set_coords(coord_t *c, int16_t x, int16_t y, int16_t z)
-{
-	c->x = x;
-	c->y = y;
-	c->z = z;
-}
-
-// FIXME: rename to make_coord and make public
-coord_t create_coord(int16_t x, int16_t y, int16_t z)
-{
-	coord_t c;
-	c.x = x;
-	c.y = y;
-	c.z = z;
-	return c;
-}
+#include "coord.h"
+#include "commands.h"
 
 void calc_boundary_box(matrix_t *mdl, coord_t *minFull, coord_t *maxFull)
 {
@@ -29,7 +14,8 @@ void calc_boundary_box(matrix_t *mdl, coord_t *minFull, coord_t *maxFull)
 	*maxFull = min;
 	region_t r = make_region(min, max);
 
-	FOR_EACH_COORD(cur, r) {
+	FOR_EACH_COORD(cur, r)
+	{
 		if (get_voxel(mdl, cur) == Full)
 		{
 			if (cur.x < minFull->x)
@@ -57,30 +43,11 @@ void calc_boundary_box(matrix_t *mdl, coord_t *minFull, coord_t *maxFull)
 				maxFull->z = cur.z;
 			}
 		}
-	} END_FOR_EACH_COORD;
+	}
+	END_FOR_EACH_COORD;
 }
 
-void halt_cmd(command_t *cmds)
-{
-	// add command !
-}
-
-command_t fill_cmd(coord_t nd)
-{
-	command_t cmd;
-	cmd.type = Fill;
-	// FIXME: check nd
-	cmd.Fill_nd = nd;
-	return cmd;
-}
-
-void smove_cmd(coord_t *curPos, coord_t lld, command_t *cmds)
-{
-	*curPos = add_coords(*curPos, lld);
-	// add command !
-}
-
-void goto_next_pos(coord_t *curPos, coord_t nextPos, command_t *cmds)
+void goto_next_pos(coord_t *curPos, coord_t nextPos, GArray *cmds)
 {
 	coord_t tmp;
 	coord_t lld;
@@ -88,45 +55,49 @@ void goto_next_pos(coord_t *curPos, coord_t nextPos, command_t *cmds)
 	// y movement must be done at 1st !
 	while ((nextPos.y - curPos->y) > 15)
 	{
-		set_coords(&lld, 0, 15, 0);
-		smove_cmd(curPos, lld, cmds);
+		lld = create_coord(0, 15, 0);
+		add_cmd(cmds, smove_cmd(lld));
+		*curPos = add_coords(*curPos, lld);
 	}
-	set_coords(&lld, 0, (nextPos.y - curPos->y), 0);
-	smove_cmd(curPos, lld, cmds);
+	lld = create_coord(0, (nextPos.y - curPos->y), 0);
+	add_cmd(cmds, smove_cmd(lld));
+	*curPos = add_coords(*curPos, lld);
 
 	while ((nextPos.x - curPos->x) > 15)
 	{
-		set_coords(&lld, 15, 0, 0);
-		smove_cmd(curPos, lld, cmds);
+		lld = create_coord(15, 0, 0);
+		add_cmd(cmds, smove_cmd(lld));
+		*curPos = add_coords(*curPos, lld);
 	}
-	set_coords(&lld, (nextPos.x - curPos->x), 0, 0);
-	smove_cmd(curPos, lld, cmds);
+	lld = create_coord((nextPos.x - curPos->x), 0, 0);
+	add_cmd(cmds, smove_cmd(lld));
+	*curPos = add_coords(*curPos, lld);
 
 	while ((nextPos.z - curPos->z) > 15)
 	{
-		set_coords(&lld, 0, 0, 15);
-		smove_cmd(curPos, lld, cmds);
+		lld = create_coord(0, 0, 15);
+		add_cmd(cmds, smove_cmd(lld));
+		*curPos = add_coords(*curPos, lld);
 	}
-	set_coords(&lld, 0, 0, (nextPos.z - curPos->z));
-	smove_cmd(curPos, lld, cmds);
-}
-
-static void
-add_cmd (GArray *cmds, command_t cmd) {
-	g_array_append_val(cmds, cmd);
+	lld = create_coord(0, 0, (nextPos.z - curPos->z));
+	add_cmd(cmds, smove_cmd(lld));
+	*curPos = add_coords(*curPos, lld);
 }
 
 GArray exec_default_trace(matrix_t *mdl)
 {
-	GArray* cmds = g_array_new(FALSE, FALSE, sizeof(command_t));
+	GArray *cmds = g_array_new(FALSE, FALSE, sizeof(command_t));
 
 	// Calculate boundary box
 	coord_t minFull, maxFull;
 	calc_boundary_box(mdl, &minFull, &maxFull);
 
 	coord_t curPos, startPos;
-	set_coords(&curPos, 0, 0, 0);
 	int16_t x, y, z;
+
+	// turn off gravity
+	add_cmd(cmds, flip_cmd());
+
 
 	startPos = add_coords(minFull, create_coord(0, 1, 0));
 	for (y = startPos.y; y < maxFull.y + 1; y++)
@@ -143,9 +114,14 @@ GArray exec_default_trace(matrix_t *mdl)
 			}
 		}
 	}
+
 	// go back to home position
 	goto_next_pos(&curPos, create_coord(0, maxFull.y + 1, 0), cmds);
 	goto_next_pos(&curPos, create_coord(0, 0, 0), cmds);
 
-	halt_cmd(cmds);
+	// turn on gravity
+	add_cmd(cmds, flip_cmd());
+
+	// halt
+	add_cmd(cmds, halt_cmd());
 }
