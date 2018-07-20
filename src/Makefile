@@ -2,7 +2,7 @@ CPPFLAGS = -MD
 CC = gcc
 CFLAGS = -Werror -O2 -std=c99 -g \
 	$(shell pkg-config --cflags glib-2.0)
-LDFLAGS =
+LDFLAGS = -lgc
 LDLIBS = $(shell pkg-config --libs glib-2.0)
 
 BINS = _test
