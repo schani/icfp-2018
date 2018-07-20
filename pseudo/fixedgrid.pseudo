@@ -19,26 +19,36 @@ fixedgrid():
 fill_local_grid(...):
     move up a plane, i.e., (0,1,0)
 
-   Loop:
-       Fill if necessary everything in range on plane below
-       if can move (0,0,4):
-           Move (0,0,4)
-           Fill if necessary everything in range on plane below
-           Move (1,0,0)
-       else if can move (0,0,3):
-           Move (0,0,3)
-           Fill if necessary everything in range on plane below
-           Move (1,0,0)
-       else:
-           Move (1,0,0)
-           if can move (0,0,2):
-               Move (0,0,2)
-           else if can move (0,0,1):
-               Move (0,0,1)
-               Fill if necessary everything in range on plane below
-               Move (0,0,-3)
-           else:
-               Move (0,0,-2)
+    // loop over columns in local grid
+    loop:
+    	fill;
+    	if can move (0,4):
+    		move (0,4);
+    		break;
+    	if can move (0,3):
+    		move (0,3);
+    		fill;
+    		move (1,-1);
+    		invert direction;
+    		break;
+    	if can move (0,2 or less):
+    		move (1,0);
+    		if can move (0,2):
+    			move (0,2);
+    			invert direction;
+    			break;
+    		if can move (0,1):
+    			move (0,1);
+    			fill;
+    			move (0,-3);
+    			invert direction;
+    			break;
+    		move (0,-2);
+    		break;
+
+
+
+
 
 
 like so:
