@@ -3,7 +3,6 @@
 
 #include "model.h"
 
-#define MatrixDataSize(resolution) resolution *resolution *resolution, sizeof(voxel_t)
 
 matrix_t
 make_matrix(int resolution)
