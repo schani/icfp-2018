@@ -1,3 +1,6 @@
+#ifndef _TRACE_H
+#define _TRACE_H
+
 #include <stdint.h>
 
 typedef enum {
@@ -44,3 +47,5 @@ typedef struct {
     int n_timesteps;
     timestep_t *timesteps;
 } trace_t;
+
+#endif /* _TRACE_H */
