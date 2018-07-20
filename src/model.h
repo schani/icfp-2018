@@ -5,6 +5,11 @@
 
 typedef uint8_t voxel_t;
 
+typedef enum {
+    Empty = 0,
+    Full = 1
+} voxel_state_t;
+
 typedef struct {
     int resolution;
     voxel_t *data;
@@ -27,5 +32,6 @@ set_voxel (matrix_t *m, coord_t c, voxel_t v) {
 
 matrix_t make_matrix(int resolution);
 
-matrix_t
-copy_matrix(matrix_t* from);
+matrix_t copy_matrix(matrix_t from);
+
+void free_matrix(matrix_t matrix);

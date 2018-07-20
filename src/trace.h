@@ -19,6 +19,15 @@ typedef struct {
     int16_t x, y, z;
 } coord_t;
 
+static coord_t
+add_coords (coord_t c1, coord_t c2) {
+    coord_t c;
+    c.x = c1.x + c2.x;
+    c.y = c1.y + c2.y;
+    c.z = c1.z + c2.z;
+    return c;
+}
+
 typedef struct {
     command_type_t type;
     coord_t coord1;

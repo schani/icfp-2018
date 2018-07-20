@@ -11,8 +11,12 @@ make_matrix(int resolution) {
 }
 
 matrix_t
-copy_matrix(matrix_t* from) {
+copy_matrix(matrix_t from) {
     matrix_t m = make_matrix(from.resolution);
-    memcpy(m.data, from->data, MatrixDataSize(resolution);
+    memcpy(m.data, from.data, MatrixDataSize(resolution);
     return m;
+
+void
+free_matrix (matrix_t matrix) {
+    free(matrix.data);
 }
