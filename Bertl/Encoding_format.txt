@@ -1,0 +1,19 @@
+
+Halt
+
+Wait
+
+Flip
+
+SMove   12 0 0
+
+LMove   3 0 0   0 -5 0
+
+FusionP -1 1 0
+
+FusionS 1 -1 0
+
+Fission 0 0 1  5
+
+Fill    0 -1 0
+
