@@ -8,3 +8,17 @@ make_state (void) {
     memset(&s, 0, sizeof(state_t));
     return s;
 }
+
+bot_t
+make_bot (bid_t bid, coord_t pos, int n_seeds, bid_t *seeds) {
+    bot_t bot;
+    bot.bid = bid;
+    bot.pos = pos;
+    bot.n_seeds = n_seeds;
+    if (seeds == NULL) {
+        bot.seeds = calloc(sizeof(bid_t), n_seeds);
+    } else {
+        bot.seeds = seeds;
+    }
+    return bot;
+}
