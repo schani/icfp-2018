@@ -9,5 +9,5 @@ all : nbt2ascii ascii2nbt
 
 clean :
 	rm -f *~ *.o 
-	rm -f 
+	rm -f nbt2ascii ascii2nbt
 
