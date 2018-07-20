@@ -12,7 +12,7 @@ typedef struct {
     bid_t bid;
     coord_t pos;
     int n_seeds;
-    bid_t *seeds;
+    bid_t *seeds; // immutable!!!
 } bot_t;
 
 typedef struct {
@@ -24,3 +24,5 @@ typedef struct {
 } state_t;
 
 state_t make_state (void);
+
+bot_t make_bot (bid_t bid, coord_t pos, int n_seeds, bid_t *seeds);
