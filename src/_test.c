@@ -10,8 +10,8 @@ int
 main() 
 {
     GList *list = NULL;
-    list = g_list_append( list, "muh (powered by glib)\n" );
-    fprintf( stderr, g_list_first(list)->data );
+    list = g_list_append( list, "muh (powered by glib)" );
+    fprintf( stderr, "%s\n", g_list_first(list)->data );
     return 0;
 }
 
