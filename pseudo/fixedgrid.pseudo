@@ -1,8 +1,8 @@
-// One-pass algorithm with z-dimension-wise decomposition on a fixed grid per z coordinate
+// One-pass algorithm with y-dimension-wise decomposition on a fixed grid per y coordinate
 
 fixedgrid():
-// pre: robot 1 in (0,0)
-// post: robot 1 in (0,0)
+// pre: robot 1 in (0,0,0)
+// post: robot 1 in (0,0,0)
     place_on_grid()
     for k in {0..R-1}:
         if floating necessary in next round:
@@ -17,29 +17,29 @@ fixedgrid():
 
 
 place_on_grid():
-// pre: robot 1 in (0,0)
-// post: robots 1-20 on each of (i*R/5, j*R/4) for i in {0..4} and j in {0..3}
+// pre: robot 1 in (0,0,0)
+// post: robots 1-20 on each of (i*R/5, 0, j*R/4) for i in {0..4} and j in {0..3}
 
     code for robot r:
         if r == 1:
             // ALERT: the following code is sequential per robot
-            robot r splits (nd = (0,1), m = n-5)        // ALERT: n is local
-            robot r splits (nd = (1,0), m = 4)
+            robot r splits (nd = (0,0,1), m = n-5)        // ALERT: n is local
+            robot r splits (nd = (1,0,0), m = 4)
 
-        if r was spawned with nd = (0,1):
+        if r was spawned with nd = (0,0,1):
             // ALERT: the following code is sequential per robot
-            robot r moves up the grid (lld = (0,R/4 - 1))
-            robot r splits (nd = (0,1), m = n-5)        // ALERT: n is local
-            robot r splits (nd = (1,0), m = 4)
+            robot r moves up the grid (lld = (0,0,R/4 - 1))
+            robot r splits (nd = (0,0,1), m = n-5)        // ALERT: n is local
+            robot r splits (nd = (1,0,0), m = 4)
 
-        if r was spawned with nd = (1,0):
+        if r was spawned with nd = (1,0,0):
             // ALERT: the following code is sequential per robot
-            robot r moves right on the grid (lld = (R/5 - 1,0))
-            robot r splits (nd = (1,0), m = n-1)        // ALERT: n is local
+            robot r moves right on the grid (lld = (R/5 - 1,0,0))
+            robot r splits (nd = (1,0,0), m = n-1)        // ALERT: n is local
 
 
 gather_from_grid():
-// pre: robots 1-20 on each of (i*R/5, j*R/4) for i in {0..4} and j in {0..3}
-// post: robot 1 in (0,0)
+// pre: robots 1-20 on each of (i*R/5, 0, j*R/4) for i in {0..4} and j in {0..3}
+// post: robot 1 in (0,0,0)
 
     // inverse of place_on_grid()
