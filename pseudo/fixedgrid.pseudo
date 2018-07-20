@@ -10,10 +10,51 @@ fixedgrid():
         else:
             Set harmonics to Low
         for each robot r in {1..20}:
-            Scan local grid from top left to bottom right, filling voxels as needed, moving at max speed if possible
+            Scan local grid from top left to bottom right, filling voxels via fill_local_grid(), moving at max speed if possible
             Then move back to local origin
     gather_from_grid()
     move_to_origin()
+
+
+fill_local_grid(...):
+    move up a plane, i.e., (0,1,0)
+
+   Loop:
+       Fill if necessary everything in range on plane below
+       if can move (0,0,4):
+           Move (0,0,4)
+           Fill if necessary everything in range on plane below
+           Move (1,0,0)
+       else if can move (0,0,3):
+           Move (0,0,3)
+           Fill if necessary everything in range on plane below
+           Move (1,0,0)
+       else:
+           Move (1,0,0)
+           if can move (0,0,2):
+               Move (0,0,2)
+           else if can move (0,0,1):
+               Move (0,0,1)
+               Fill if necessary everything in range on plane below
+               Move (0,0,-3)
+           else:
+               Move (0,0,-2)
+
+
+like so:
+
+|_| |_
+|_   _|
+| |_| |_
+|  _|  _|
+|_| |_| |_
+|_   _| __|
+| |_| |_|
+|  _|  _|
+|_| |_| |_
+|_   _|  _|
+| |_| |_| |_
+|___|___|___|
 
 
 place_on_grid():
