@@ -10,7 +10,7 @@ typedef struct {
 
 static size_t
 get_pos (matrix_t *m, coord_t c) {
-    return ((c.x * m->resolution) + c.y) * m->resolution + c.z;
+    return ((c.y * m->resolution) + c.x) * m->resolution + c.z;
 }
 
 static inline uint8_t
