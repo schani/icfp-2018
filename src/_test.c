@@ -1,6 +1,7 @@
 /* exists to check all headers */
 
 #include <stdio.h>
+#include <glib.h>
 
 #include "model.h"
 #include "trace.h"
@@ -8,7 +9,9 @@
 int
 main() 
 {
-    fprintf( stderr, "muh\n" );
+    GList *list = NULL;
+    list = g_list_append( list, "muh (powered by glib)\n" );
+    fprintf( stderr, g_list_first(list)->data );
     return 0;
 }
 
