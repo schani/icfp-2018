@@ -53,7 +53,7 @@ fill_cmd(coord_t nd)
     assert(is_nd(nd));
 
 	command_t cmd;
-	cmd.type = Fill;	
+	cmd.type = Fill;
 	cmd.Fill_nd = nd;
 	return cmd;
 }

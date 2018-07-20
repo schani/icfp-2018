@@ -5,8 +5,6 @@
 #include "coord.h"
 #include "commands.h"
 
-
-
 typedef struct {
     coord_t c_min, c_max;
 } region_t;

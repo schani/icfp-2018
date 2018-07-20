@@ -6,6 +6,7 @@
 
 #include "model.h"
 #include "trace.h"
+#include "default_trace.h"
 
 int
 main() 
