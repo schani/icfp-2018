@@ -3,9 +3,11 @@
 
 #include "trace.h"
 
+typedef uint8_t voxel_t;
+
 typedef struct {
     int resolution;
-    uint8_t *data;
+    voxel_t *data;
 } matrix_t;
 
 static size_t
@@ -13,12 +15,14 @@ get_pos (matrix_t *m, coord_t c) {
     return ((c.y * m->resolution) + c.x) * m->resolution + c.z;
 }
 
-static inline uint8_t
+static inline voxel_t
 get_voxel (matrix_t *m, coord_t c) {
     return m->data[get_pos(m, c)];
 }
 
-static inline uint8_t
-set_voxel (matrix_t *m, coord_t c, uint8_t v) {
+static inline voxel_t
+set_voxel (matrix_t *m, coord_t c, voxel_t v) {
     m->data[get_pos(m, c)] = v;
 }
+
+matrix_t make_matrix(int resolution);
