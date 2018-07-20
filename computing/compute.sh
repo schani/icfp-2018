@@ -14,8 +14,9 @@ function do_ssh() {
     printf -v "index" "%06i" "${index_nr}"
 
     # shellcheck disable=SC2029
-    if ssh -oConnectTimeout=5 -oBatchMode=yes -E "$TMPDIR/$h.sshlog" \
-	"$SSH_USER@$h" "$cmd" 2> "$TMPDIR/$h.stderr" > "$TMPDIR/$h.stdout"
+    if ssh -oConnectTimeout=5 -oBatchMode=yes -E "$TMPDIR/$index.$h.sshlog" \
+	"$SSH_USER@$h" "$cmd" \
+	2> "$TMPDIR/$index.$h.stderr" > "$TMPDIR/$index.$h.stdout"
     then
 	prefix="+   "
     else
@@ -23,38 +24,49 @@ function do_ssh() {
 
 	if (( retval == 255 ))
 	then
-	    if [ -s "$TMPDIR/$h.sshlog" ]
+	    if [ -s "$TMPDIR/$index.$h.sshlog" ]
 	    then
 		# probably a failure of ssh not on remote side
 		prefix="!ssh"
 	    else
 		prefix="e255"
+		touch "$TMPDIR/ERROR"
 	    fi
 	else
 	    printf -v prefix "e%3i" "$retval"
+	    touch "$TMPDIR/ERROR"
 	fi
     fi
 	
     echo -n "${prefix}" > "$TMPDIR/$index.$h"
-    if [ -s "$TMPDIR/$h.stdout" ]
+    if [ -s "$TMPDIR/$index.$h.stdout" ]
     then
 	echo -n " [STDOUT] " >> "$TMPDIR/$index.$h"
-	tr '\n' ' ' < "$TMPDIR/$h.stdout" | tr -d '\r' >> "$TMPDIR/$index.$h"
+	tr '\n' ' ' < "$TMPDIR/$index.$h.stdout" | tr -d '\r' \
+	    >> "$TMPDIR/$index.$h"
     fi
-    if [ -s "$TMPDIR/$h.stderr" ]
+    if [ -s "$TMPDIR/$index.$h.stderr" ]
     then
 	echo -n " [STDERR] " >> "$TMPDIR/$index.$h"
-	tr '\n' ' ' < "$TMPDIR/$h.stderr" | tr -d '\r' >> "$TMPDIR/$index.$h"
+	tr '\n' ' ' < "$TMPDIR/$index.$h.stderr" | tr -d '\r' \
+	    >> "$TMPDIR/$index.$h"
 	touch "$TMPDIR/ERROR"
     fi
     if [ -s "$TMPDIR/$h.sshlog" ]
     then
-	echo -n " [SSH] " >> "$TMPDIR/index.$h"
-        tr '\n' ' ' < "$TMPDIR/$h.sshlog" | tr -d '\r' >> "$TMPDIR/$index.$h"
+	echo -n " [SSH] " >> "$TMPDIR/$index.$h"
+        tr '\n' ' ' < "$TMPDIR/$index.$h.sshlog" | tr -d '\r' >> \
+	    "$TMPDIR/$index.$h"
 	touch "$TMPDIR/ERROR"
     fi
     echo "" >> "$TMPDIR/$index.$h"
-    rm -f "$TMPDIR/$h."{stdout,stderr,sshlog}
+    [ -a "$TMPDIR/ERROR" ] || {
+	if [ -s "$TMPDIR/$index.$h.stdout" ]
+	then
+	    cat "$TMPDIR/$index.$h.stdout"
+	fi
+    }
+    rm -f "$TMPDIR/$index.$h."{stdout,stderr,sshlog}
 }
 
 function ssh_show_results() {
@@ -69,6 +81,53 @@ function ssh_check_for_errors() {
     [ -f "$TMPDIR/ERROR" ] || return 0
 
     ssh_show_results
+}
+
+# currently if run runs out of nodes it will start over again
+function run() {
+    (( $# == 4 )) || fatal "run: got $# args instead of 4"
+
+    local dir="$1" bin="$2" arglistfile="$3" resultdir="$4"
+    local RUNDIR="$TMPDIR/RUN" RESULTDIR="$TMPDIR/RESULT"
+
+    [ -a "$resultdir" ] && fatal "run: resultdir already exists: $resultdir"
+
+    local runid=$(basename "$TMPDIR")
+
+    mkdir "$RUNDIR" || fatal "run: failed to mkdir '$RUNDIR'"
+    mkdir "$RESULTDIR" || fatal "run: failed to mkdir '$RESULTDIR'"
+
+    [ -f "$arglistfile" ] || fatal "run: no such arglist file: $arglistfile"
+    cp "$arglistfile" "$RUNDIR/arglistfile"
+
+    if [ -d "$dir" ]
+    then
+	cp -a "$dir" "$RUNDIR/wd" || fatal "run: failed to cp -a"
+	tar -C "$RUNDIR/wd" -czf "$RUNDIR/wd.tar.gz" "." || \
+	    fatal "tar: failed to tar -czf"
+    else
+	fatal "run: no such dir found: $dir"
+    fi
+
+    local line index=0 nodenr=0 node
+    while read -r line || [[ -n "$line" ]]
+    do
+	node="${nodes[$nodenr]}"
+	#echo "DEBUG: index=$index nodenr=$nodenr lastnode=$node of ${#nodes[@]}"
+	nodenr=$((nodenr + 1))
+	(( nodenr < ${#nodes[@]} )) || nodenr=0
+
+	local remotewd="$runid.$index"
+
+	do_ssh "$index" "$node" "mkdir $remotewd && tar -C $remotewd -xzf - && cd $remotewd && \"$bin\" $line > STDOUT && cd ~ && tar -C $remotewd -czf - . && rm -rf $remotewd" < "$RUNDIR/wd.tar.gz" > "$RESULTDIR/$index-result.tar.gz" &
+	index=$((index + 1))
+    done < "$RUNDIR/arglistfile"
+    wait
+
+    mkdir "$resultdir"
+    mv "$RESULTDIR/"* "$resultdir/."
+
+    ssh_check_for_errors
 }
 
 function renew_keys() {
@@ -105,7 +164,7 @@ function check_nodes() {
     local node index=0
     for node in "${nodes[@]}"
     do
-	do_ssh "$index" "$node" "uname -a" &
+	do_ssh "$index" "$node" "uname -a" >/dev/null &
 	index=$((index + 1))
     done
     wait
@@ -117,8 +176,10 @@ function usage() {
 cat >&2 <<EOF
 ${0##*/}: usage: ${0##*/} command
   where command can be:
+    run <dir> <binary> <arg-list-file> <result-dir> .. run binary in dir 
+          with args found in arg-list-file, nodes will be used in paralell
     scan-keys .. scans for ssh host keys and displays them to stdout
-    renew-keys .. will renew all shh keys from ssh_keys.pub
+    renew-keys .. will renew all ssh keys from ssh_keys.pub
     check-nodes .. check if nodes are up (output of uname -a is shown)
 EOF
     bb_traps_disable
@@ -140,6 +201,7 @@ function main() {
     TMPDIR=$(mktemp -d /tmp/compute.XXXXXXXXXX) || fatal "mktemp failed"
 
     case "$cmd" in
+	run) run "$@";;
 	scan-keys) scan_keys "$@";;
 	renew-keys) renew_keys "$@";;
 	check-nodes) check_nodes "$@";;

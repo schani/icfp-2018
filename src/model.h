@@ -1,3 +1,6 @@
+#ifndef _MODEL_H
+#define _MODEL_H
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -48,3 +51,5 @@ matrix_t make_matrix(int resolution);
 matrix_t copy_matrix(matrix_t from);
 
 void free_matrix(matrix_t matrix);
+
+#endif /* _MODEL_H */
