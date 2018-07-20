@@ -8,3 +8,7 @@ make_matrix(int resolution) {
     return m;
 }
 
+void
+free_matrix (matrix_t matrix) {
+    free(matrix.data);
+}
