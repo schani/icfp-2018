@@ -1,0 +1,5 @@
+Automatic Submission:
+
+1.) Generated Tracefiles have to be in Traces directory
+2.) "submit.sh [ID]" zips the traces, encrypts the zip, calculates checksum, uploads the zip to server and submits url and checksum to icfp
+
