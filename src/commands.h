@@ -70,12 +70,49 @@ smove_cmd(coord_t lld)
 }
 
 static inline command_t
+lmove_cmd(coord_t sld1, coord_t sld2)
+{
+    assert(is_sld(sld1));
+    assert(is_sld(sld2));
+
+	command_t cmd;
+    cmd.type = LMove;
+    cmd.LMove_sld1 = sld1;
+    cmd.LMove_sld2 = sld2;
+    return cmd;
+}
+
+static inline command_t
+fission_cmd(coord_t nd, int m)
+{
+    assert(is_nd(nd));
+    assert(m>=0);
+
+	command_t cmd;
+    cmd.type = Fission;
+    cmd.Fission_nd = nd;
+    cmd.m = m;
+    return cmd;
+}
+
+
+static inline command_t
 flip_cmd()
 {
 	command_t cmd;
     cmd.type = Flip;
     return cmd;
 }
+
+static inline command_t
+wait_cmd()
+{
+	command_t cmd;
+    cmd.type = Wait;
+    return cmd;
+}
+
+
 
 static inline void
 add_cmd(GArray *cmds, command_t cmd)
