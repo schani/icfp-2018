@@ -5,6 +5,8 @@
 
 #include "state.h"
 
+#include <string.h>
+
 typedef enum {
     NonVolatile = 0,
     Volatile = 1
