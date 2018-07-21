@@ -22,18 +22,6 @@ add_coords (coord_t c1, coord_t c2) {
     return c;
 }
 
-static inline void
-coord_tostring (coord_t c, char* s) {
-    printf("Coordinates: %s (%i,%i,%i)\n", s, c.x, c.y, c.z);
-}
-static inline bool
-is_coords_equal(coord_t c1, coord_t c2){
-    return ((c1.x == c2.x) && (c1.y = c2.y) && (c1.z == c2.z));
-}
-
-
-
-
 // FIXME: rename to make_coord and make public
 static inline coord_t 
 create_coord(int16_t x, int16_t y, int16_t z)
@@ -43,6 +31,31 @@ create_coord(int16_t x, int16_t y, int16_t z)
 	c.y = y;
 	c.z = z;
 	return c;
+}
+
+static inline coord_t
+add_x (coord_t c, xyz_t x) {
+    return add_coords(c, create_coord(x, 0, 0));
+}
+
+static inline coord_t
+add_y (coord_t c, xyz_t y) {
+    return add_coords(c, create_coord(0, y, 0));
+}
+
+static inline coord_t
+add_z (coord_t c, xyz_t z) {
+    return add_coords(c, create_coord(0, 0, z));
+}
+
+static inline void
+coord_tostring (coord_t c, char* s) {
+    printf("Coordinates: %s (%i,%i,%i)\n", s, c.x, c.y, c.z);
+}
+
+static inline bool
+is_coords_equal(coord_t c1, coord_t c2){
+    return ((c1.x == c2.x) && (c1.y = c2.y) && (c1.z == c2.z));
 }
 
 /* is linear coordinate difference */

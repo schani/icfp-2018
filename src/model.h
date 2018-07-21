@@ -45,6 +45,12 @@ set_voxel (matrix_t *m, coord_t c, voxel_t v) {
     m->data[get_pos(m, c)] = v;
 }
 
+static inline region_t
+matrix_region (matrix_t *m) {
+    resolution_t res = m->resolution;
+    return make_region(create_coord(0, 0, 0), create_coord(res-1, res-1, res-1));
+}
+
 bool region_is_empty (matrix_t *m, region_t r);
 
 matrix_t make_matrix(resolution_t resolution);

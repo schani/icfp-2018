@@ -30,9 +30,8 @@ copy_matrix(matrix_t from)
 
 bool
 are_matrixes_equal(matrix_t a, matrix_t b) {
-    resolution_t res = a.resolution;
-    if (res != b.resolution) return false;
-    region_t r = make_region(create_coord(0, 0, 0), create_coord(res-1, res-1, res-1));
+    if (a.resolution != b.resolution) return false;
+    region_t r = matrix_region(&a);
     FOR_EACH_COORD(c, r) {
         if (get_voxel(&a, c) != get_voxel(&b, c)) return false;
     } END_FOR_EACH_COORD;
