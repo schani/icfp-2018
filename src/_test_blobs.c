@@ -79,6 +79,19 @@ main()
         }
     }
     
+    GArray* a;
+    area_t area;
+    a = find_areas(&phases, &blobs, 1, 1);
+    assert(a->len == 1);
+    area =  g_array_index(a, area_t, 0);
+    region_t box1 =  make_region(create_coord(1, 1, 1), create_coord(2, 1, 2));
+    assert(region_equal(&area.bounding_box, &box1));
+    a = find_areas(&phases, &blobs, 1, 2);
+    assert(a->len == 1);
+    a = find_areas(&phases, &blobs, 2, 1);
+    assert(a->len == 1);
+
+    
 
     return 0;
 }
