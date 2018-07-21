@@ -4,3 +4,5 @@ problemsL
 *.d
 *.o
 src/_test
+core.*
+generate_default_trace
