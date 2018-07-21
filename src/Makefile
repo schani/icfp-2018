@@ -2,12 +2,12 @@
 
 CPPFLAGS = -MMD
 CC = gcc
-CFLAGS = -Werror -O2 -std=c99 -g \
+CFLAGS = -Werror -O0 -std=c99 -g \
 	$(shell pkg-config --cflags glib-2.0)
 LDFLAGS = -lgc
 LDLIBS = $(shell pkg-config --libs glib-2.0)
 
-MAINS = _test _test_blobs nbtio_test generate_default_trace run_trace make_plan
+MAINS = _test _test_blobs nbtio_test generate_default_trace run_trace make_plan build
 MAIN_OBJS = $(patsubst %, %.o, $(MAINS))
 
 SRCS = $(filter-out $(MAINS), $(wildcard *.c))

@@ -39,8 +39,8 @@ are_matrixes_equal(matrix_t a, matrix_t b) {
 }
 
 void
-free_matrix (matrix_t matrix) {
-    free(matrix.data);
+free_matrix (matrix_t *matrix) {
+    free(matrix->data);
 }
 
 bool

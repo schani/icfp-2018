@@ -12,6 +12,8 @@ typedef struct {
 execution_t start_timestep (state_t state, command_t *commands);
 state_t finish_timestep (execution_t *exec);
 
+state_t exec_timestep (state_t state, command_t *commands);
+
 matrix_t exec_trace (trace_t trace, resolution_t resolution);
 
 static inline energy_t
