@@ -7,7 +7,7 @@ CFLAGS = -Werror -O2 -std=c99 -g \
 LDFLAGS = -lgc
 LDLIBS = $(shell pkg-config --libs glib-2.0)
 
-MAINS = _test nbtio_test generate_default_trace run_trace make_plan
+MAINS = _test _test_blobs nbtio_test generate_default_trace run_trace make_plan
 MAIN_OBJS = $(patsubst %, %.o, $(MAINS))
 
 SRCS = $(filter-out $(MAINS), $(wildcard *.c))
