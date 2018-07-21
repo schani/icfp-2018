@@ -101,3 +101,48 @@ make_plan (matrix_t *model, matrix_t *phases, matrix_t *blobs) {
         direction = -direction;
     }
 }
+
+
+void
+make_grounded (matrix_t *phases, matrix_t* grounded) {
+    region_t r = matrix_region(phases);
+    resolution_t res = phases->resolution;
+    *grounded = make_matrix(res);
+
+    FOR_EACH_COORD(c, r) {
+        if (get_voxel(phases, c) == 0) {
+            set_voxel(grounded, c, Free);
+            continue;
+        }
+        
+        // all filled phase-areas are by default = TransitiveGrounded
+        set_voxel(grounded, c, TransitiveGrounded);
+
+        if (get_voxel(phases, c) % 2 != 0)
+        {
+            // ODD: compare with layer below
+            if (c.y > 0) {
+                c.y -= 1;
+                if (get_voxel(phases, c) > 0) {
+                    // =filled
+                    set_voxel(grounded, c, Grounded);
+                }
+            }
+            else {
+                set_voxel(grounded, c, Grounded);
+            }
+        }
+        else 
+        {
+            // EVEN: compare with upper layer
+            if (c.y < r.c_max.y) {
+                c.y += 1;
+                if (get_voxel(phases, c) > 0) {
+                    // =filled
+                    set_voxel(grounded, c, Grounded);
+                }
+            }
+        }
+
+    } END_FOR_EACH_COORD;
+}
