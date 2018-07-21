@@ -73,13 +73,15 @@ function ssh_show_results() {
     local f
     for f in "$TMPDIR"/*.*
     do
-	cat "$f"
+	egrep -qv "^[e!]" "$f" || \
+	    echo "${f##*/}: $(cat "$f")"
     done
 }
 
 function ssh_check_for_errors() {
     [ -f "$TMPDIR/ERROR" ] || return 0
 
+    log "ALERT: THERE HAVE BEEN ERRORS"
     ssh_show_results
 }
 
@@ -112,7 +114,7 @@ function run() {
 	fatal "run: no such dir found: $dir"
     fi
 
-    local line index=0 nodenr=0 node
+    local line index=1 nodenr=0 node
     while read -r line || [[ -n "$line" ]]
     do
 	node="${nodes[$nodenr]}"
@@ -122,13 +124,23 @@ function run() {
 
 	local remotewd="$runid.$index"
 
+	echo "$line" > "$RESULTDIR/$index.args"
 	do_ssh "$index" "$node" "mkdir $remotewd && tar -C $remotewd -xzf - && cd $remotewd && \"$bin\" $line > STDOUT && cd ~ && tar -C $remotewd -czf - . && rm -rf $remotewd" < "$RUNDIR/wd.tar.gz" > "$RESULTDIR/$index-result.tar.gz" &
 	index=$((index + 1))
     done < "$RUNDIR/arglistfile"
     wait
 
     mkdir "$resultdir"
-    mv "$RESULTDIR/"* "$resultdir/."
+    local f
+    for f in "$RESULTDIR/"*
+    do
+	if [ -s "$f" ]
+	then
+	    mv "$f" "$resultdir/."
+	else
+	    touch "$resultdir/FAILED:${f##*/}"
+	fi
+    done
 
     ssh_check_for_errors
 }
