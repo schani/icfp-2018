@@ -3,6 +3,7 @@
 
 #include "model.h"
 #include "coord.h"
+#include "plan.h"
 #include <gmodule.h>
 
 
