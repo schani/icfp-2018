@@ -4,9 +4,17 @@
 #include "coord.h"
 
 
+typedef enum{  
+    Free = 0,
+    Grounded,
+    TransitiveGrounded
+} grounded_type_t;
+
+
+
 typedef struct {
     coord_t c;
-    int grounded;
+    grounded_type_t grounded;
     int potential;
 } extd_coord_t;
 
