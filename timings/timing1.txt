@@ -1,0 +1,87 @@
+timings done by hand with https://icfpcontest2018.github.io/lgtn/exec-trace-novis.html and our codebase with tag timing1
+
+LA008 steps=1:
+Success::
+Time:      4939
+Commands:  4939
+Energy:    1185055212
+ClockTime: 97285ms
+
+LA008 steps=100:
+Success::
+Time:      4939
+Commands:  4939
+Energy:    1185055212
+ClockTime: 883ms
+
+LA008 steps=1000:
+Success::
+Time:      4939
+Commands:  4939
+Energy:    1185055212
+ClockTime: 214ms
+
+all step 1000 now:
+
+LA024:
+Success::
+Time:      29975
+Commands:  29975
+Energy:    24279023204
+ClockTime: 632ms
+
+LA033:
+Success::
+Time:      26226
+Commands:  26226
+Energy:    21242221356
+ClockTime: 589ms
+
+LA044:
+Success::
+Time:      60439
+Commands:  60439
+Energy:    116040982732
+ClockTime: 1390ms
+
+LA055:
+Success::
+Time:      21314
+Commands:  21314
+Energy:    40919937352
+ClockTime: 621ms
+
+LA066:
+Success::
+Time:      77746
+Commands:  77746
+Energy:    503784239996
+ClockTime: 1821ms
+
+LA077:
+Success::
+Time:      42923
+Commands:  42923
+Energy:    278130470440
+ClockTime: 1193ms
+
+LA155:
+Success::
+Time:      137980
+Commands:  137980
+Energy:    7152793112484
+ClockTime: 3561ms
+
+LA166:
+Success::
+Time:      496430
+Commands:  496430
+Energy:    61001109736364
+ClockTime: 12025ms
+
+LA177:
+Success::
+Time:      834611
+Commands:  834611
+Energy:    146023246474456
+ClockTime: 19940ms
