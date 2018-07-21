@@ -2,4 +2,4 @@ check:
 	shellcheck *.sh
 
 clean:
-	rm -f *~ build result
+	rm -rf *~ build result
