@@ -9,11 +9,13 @@
 #include "plan.h"
 #include "potential.h"
 #include "area.h"
+#include "bot_plan.h"
 
 
 void fill_rectangle_2d(matrix_t *m, int x_start, int y_fixed, int z_start, int x_len, int z_len) {
     // TODO: check if x_start+x_len <= resolution ...
 
+    // Question: why is this x_len and not x_len + 1?
     for (int x = x_start; x < x_start + x_len; x++) {
         for (int z = z_start; z < z_start + z_len; z++) {
             set_voxel(m, create_coord(x,y_fixed,z), Full);
@@ -68,7 +70,15 @@ main()
         }
     } END_FOR_EACH_COORD;
 
-    // iterate through phases and blobs, calc potential
+    // hacking together semivalid state    
+    state_t state = make_state(0, Low, make_matrix(testModel.resolution));
+    state.bots = malloc(sizeof(bot_t*)* 2);
+    state.bots[0] = make_bot (0, create_coord(0,1,0), 0, NULL);
+    state.bots[1] = make_bot (1, create_coord(testModel.resolution-1, 1, testModel.resolution-1), 0, NULL);
+    state.n_bots = 2;
+    state.matrix = testModel;
+
+    // iterate through phases and blobs, calc potentialassigning to type ‘matrix_t
     for (int y=0; y<=max_y; y++) {
         GArray* areas = find_areas(&phases, &blobs, fixed_phase, y);
         for (int a=0; a<areas->len; a++) {
@@ -77,21 +87,34 @@ main()
             area.potential = pot;
             printf("Potential for y-Layer %d / Blob %d : %d\n", y, a+1, pot); 
         }
+
+        bot_partition_t partition = partition_bots(areas, &state);
+
+        if (y == 1) {
+            assert(partition.n_areas == 2);
+            assert(partition.area_n_bots[0] == 1);
+            assert(partition.area_n_bots[1] == 1);
+            assert(partition.n_bots == 2);
+        } else {
+            assert(partition.n_areas == 1);
+            assert(partition.area_n_bots[0] == 2);
+            assert(partition.n_bots == 2);
+        }
     }
-    
+
     GArray* a;
     area_t area;
     a = find_areas(&phases, &blobs, 1, 1);
-    assert(a->len == 1);
-    area =  g_array_index(a, area_t, 0);
-    region_t box1 =  make_region(create_coord(1, 1, 1), create_coord(2, 1, 2));
-    assert(region_equal(&area.bounding_box, &box1));
-    a = find_areas(&phases, &blobs, 1, 2);
-    assert(a->len == 1);
-    a = find_areas(&phases, &blobs, 2, 1);
-    assert(a->len == 1);
+    assert(a->len == 2);
 
-    
+    region_t box1 =  make_region(create_coord(4, 1, 2), create_coord(5, 1, 5));
+    region_t box2 =  make_region(create_coord(1, 1, 3), create_coord(1, 1, 5));
+
+    area =  g_array_index(a, area_t, 0);
+    assert(region_equal(&area.bounding_box, &box1) || region_equal(&area.bounding_box, &box2));
+
+    area = g_array_index(a, area_t, 1);
+    assert(region_equal(&area.bounding_box, &box1) || region_equal(&area.bounding_box, &box2));
 
     return 0;
 }
