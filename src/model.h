@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
-
+#include <stdio.h>
+#include "coord.h"
 #include "trace.h"
 
 typedef uint8_t voxel_t;

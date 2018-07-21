@@ -1,7 +1,7 @@
 #ifndef _COORD_H
 #define _COORD_H
 
-
+#include <stdio.h>
 #include <glib.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -21,6 +21,18 @@ add_coords (coord_t c1, coord_t c2) {
     c.z = c1.z + c2.z;
     return c;
 }
+
+static inline void
+coord_tostring (coord_t c, char* s) {
+    printf("Coordinates: %s (%i,%i,%i)\n", s, c.x, c.y, c.z);
+}
+static inline bool
+is_coords_equal(coord_t c1, coord_t c2){
+    return ((c1.x == c2.x) && (c1.y = c2.y) && (c1.z == c2.z));
+}
+
+
+
 
 // FIXME: rename to make_coord and make public
 static inline coord_t 
