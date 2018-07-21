@@ -118,6 +118,11 @@ int 	comp_len(const char *a, const char *b, unsigned la, unsigned lb)
 	return 0;
 }
 
+int error_value(const char *s, int r, unsigned l)
+{
+	fprintf(stderr, "bad value (%d) for %s @ %d\n", r, s, l);
+	exit(7);
+}
 
 #define	CMD_MAX	8
 #define	ARG_MAX 6
@@ -275,7 +280,7 @@ int main(int argc, char *argv[])
 		int r = lldtoai(num[0], num[1], num[2], &a, &i);
 
 		if (r)
-		    goto error_value;
+		    error_value("lld", r, line);
 
 		putchar(0x04 | (a << 4));
 		putchar(i);
@@ -290,13 +295,13 @@ int main(int argc, char *argv[])
 		int r = sldtoai(num[0], num[1], num[2], &a1, &i1);
 
 		if (r)
-		    goto error_value;
+		    error_value("sld1", r, line);
 
 		int a2 = 0, i2 = 0;
 		r = sldtoai(num[3], num[4], num[5], &a2, &i2);
 
 		if (r)
-		    goto error_value;
+		    error_value("sld2", r, line);
 
 		putchar(0x0C | (a1 << 4) | (a2 << 6));
 		putchar(i1 | (i2 << 4));
@@ -311,7 +316,7 @@ int main(int argc, char *argv[])
 		int r = xyztond(num[0], num[1], num[2], &nd);
 
 		if (r)
-		    goto error_value;
+		    error_value("nd", r, line);
 	
 		putchar(0x07 | (nd << 3));
 	    }
@@ -325,7 +330,7 @@ int main(int argc, char *argv[])
 		int r = xyztond(num[0], num[1], num[2], &nd);
 
 		if (r)
-		    goto error_value;
+		    error_value("nd", r, line);
 	
 		putchar(0x06 | (nd << 3));
 	    }
@@ -339,7 +344,7 @@ int main(int argc, char *argv[])
 		int r = xyztond(num[0], num[1], num[2], &nd);
 
 		if (r)
-		    goto error_value;
+		    error_value("nd", r, line);
 	
 		putchar(0x05 | (nd << 3));
 		putchar(num[3]);
@@ -354,7 +359,7 @@ int main(int argc, char *argv[])
 		int r = xyztond(num[0], num[1], num[2], &nd);
 
 		if (r)
-		    goto error_value;
+		    error_value("nd", r, line);
 	
 		putchar(0x03 | (nd << 3));
 	    }
@@ -398,8 +403,5 @@ error_cmd:
 	fprintf(stderr, "unknown command @ %d\n", line);
 	exit(6);
 
-error_value:
-	fprintf(stderr, "bad value @ %d\n", line);
-	exit(6);
 }
 
