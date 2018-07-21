@@ -1,11 +1,17 @@
 #include "model.h"
 
 static bool
+is_filled (matrix_t *plan, coord_t c) {
+    if (!is_coord_valid(plan, c)) return false;
+    return get_voxel(plan, c) != 0;
+}
+
+static bool
 has_filled_neighbors (matrix_t *plan, coord_t c) {
-    if (get_voxel(plan, add_x(c, -1)) != 0) return true;
-    if (get_voxel(plan, add_x(c, 1)) != 0) return true;
-    if (get_voxel(plan, add_z(c, -1)) != 0) return true;
-    if (get_voxel(plan, add_z(c, 1)) != 0) return true;
+    if (is_filled(plan, add_x(c, -1))) return true;
+    if (is_filled(plan, add_x(c, 1))) return true;
+    if (is_filled(plan, add_z(c, -1))) return true;
+    if (is_filled(plan, add_z(c, 1))) return true;
     return false;
 }
 
@@ -60,7 +66,7 @@ make_plan (matrix_t *model) {
             for (int x = 0; x < res; x++) {
                 for (int z = 0; z < res; z++) {
                     coord_t c = create_coord(x, y, z);
-                    if (y == 0 || get_voxel(&plan, add_y(c, -direction)) != 0 || has_filled_neighbors(&plan, c)) {
+                    if (y == 0 || (y - direction < res && get_voxel(&plan, add_y(c, -direction))) != 0 || has_filled_neighbors(&plan, c)) {
                         did_fill = fill(&plan, model, c, phase) || did_fill;
                     }
                 }
