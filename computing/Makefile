@@ -1,5 +1,5 @@
 check:
-	shellcheck compute.sh
+	shellcheck *.sh
 
 clean:
-	rm *~
+	rm -f *~ build result
