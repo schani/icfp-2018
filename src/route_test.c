@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 	coord_t stop[3];
 
 	command_t cmd[3];
-	uint8_t status[3];
+	result_t status[3];
 
 
 	coord_t block = {0,2,0};

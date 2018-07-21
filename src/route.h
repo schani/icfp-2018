@@ -6,7 +6,16 @@
 
 typedef int (*cost_func_t)(coord_t *, coord_t *);
 
-int	route_bots(matrix_t *m, int n, coord_t *pos, coord_t *end, coord_t *stop, command_t *cmd, uint8_t *status);
+typedef
+enum {	
+	SUCCESS = 0,
+	ERR_SHORT = 1,
+	ERR_HIT,
+	ERR_LOST,
+} result_t;
+
+int	route_bots(matrix_t *m, int n, coord_t *pos, coord_t *end, coord_t *stop, command_t *cmd, result_t *status);
+
 int     pick_pairs(int n, coord_t *pos, coord_t *end, int *sel, cost_func_t func);
 
 
@@ -15,5 +24,7 @@ int	cost_func(coord_t *pos, coord_t *end)
 {
 	return abs(end->x - pos->x) + abs(end->y - pos->y) + abs(end->z - pos->z);
 }
+
+
 
 #endif	/* _ROUTE_H */
