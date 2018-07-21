@@ -13,3 +13,16 @@ make_region (coord_t c1, coord_t c2) {
     r.c_max.z = MAX(c1.z, c2.z);
     return r;
 }
+
+bool 
+region_equal(region_t* r1, region_t* r2) {
+    return (
+        r1->c_min.x == r2->c_min.x &&
+        r1->c_min.y == r2->c_min.y &&
+        r1->c_min.z == r2->c_min.z &&
+        r1->c_max.x == r2->c_max.x &&
+        r1->c_max.y == r2->c_max.y &&
+        r1->c_max.z == r2->c_max.z
+    );
+}
+
