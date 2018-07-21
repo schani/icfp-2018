@@ -29,11 +29,6 @@ region_t make_region (coord_t c1, coord_t c2);
 typedef struct {
     int n_commands;
     command_t *commands;
-} timestep_t;
-
-typedef struct {
-    int n_timesteps;
-    timestep_t *timesteps;
 } trace_t;
 
 #endif /* _TRACE_H */

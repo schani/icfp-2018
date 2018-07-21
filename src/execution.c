@@ -32,9 +32,9 @@ coords_equal (coord_t c1, coord_t c2) {
 }
 
 static int
-find_fusion (state_t *state, timestep_t ts, command_type_t type, coord_t c) {
-    for (int i = 0; i < ts.n_commands; i++) {
-        if (ts.commands[i].type != type) continue;
+find_fusion (state_t *state, command_t *commands, command_type_t type, coord_t c) {
+    for (int i = 0; i < state->n_bots; i++) {
+        if (commands[i].type != type) continue;
         if (!coords_equal(state->bots[i].pos, c)) continue;
         return i;
     }
@@ -58,27 +58,23 @@ compare_bots (const void *p1, const void *p2) {
 }
 
 static state_t
-exec_timestep (state_t *state, timestep_t ts) {
-    assert(state->n_bots == ts.n_commands);
-
-    matrix_t vol = make_matrix(state->matrix.resolution);
+exec_timestep (state_t state, command_t *commands) {
+    // FIXME: This is highly inefficient
+    matrix_t vol = make_matrix(state.matrix.resolution);
     GArray *new_bots = g_array_new(FALSE, FALSE, sizeof(bot_t));
 
-    state_t new_state = make_state();
-    new_state.energy = state->energy;
-    new_state.harmonics = state->harmonics;
-    new_state.matrix = state->matrix;
+    state_t new_state = make_state(state.energy, state.harmonics, state.matrix);
 
-    for (int i = 0; i < ts.n_commands; i++) {
-        bot_t bot = state->bots[i];
-        command_t *cmd = &ts.commands[i];
+    for (int i = 0; i < state.n_bots; i++) {
+        bot_t bot = state.bots[i];
+        command_t *cmd = &commands[i];
         coord_t c = bot.pos;
 
         switch (cmd->type) {
         case Halt:
             assert(c.x == 0 && c.y == 0 && c.z == 0);
-            assert(state->n_bots == 1);
-            assert(state->harmonics == Low);
+            assert(state.n_bots == 1);
+            assert(state.harmonics == Low);
             set_volatile(&vol, c);
             break;
 
@@ -102,9 +98,9 @@ exec_timestep (state_t *state, timestep_t ts) {
 
         case SMove: {
             coord_t cp = add_coords(c, cmd->SMove_lld);
-            assert(is_coord_valid(&state->matrix, cp));
+            assert(is_coord_valid(&state.matrix, cp));
             region_t r = make_region(c, cp);
-            assert(region_is_empty(&state->matrix, r));
+            assert(region_is_empty(&state.matrix, r));
             set_volatile_region(&vol, r);
             bot.pos = cp;
             g_array_append_val(new_bots, bot);
@@ -117,11 +113,11 @@ exec_timestep (state_t *state, timestep_t ts) {
             region_t r1 = make_region(c, cp);
             region_t r2 = make_region(cp, cpp);
 
-            assert(is_coord_valid(&state->matrix, cp));
-            assert(is_coord_valid(&state->matrix, cpp));
-            assert(region_is_empty(&state->matrix, r1));
+            assert(is_coord_valid(&state.matrix, cp));
+            assert(is_coord_valid(&state.matrix, cpp));
+            assert(region_is_empty(&state.matrix, r1));
             set_volatile_region(&vol, r1);
-            assert(region_is_empty(&state->matrix, r2));
+            assert(region_is_empty(&state.matrix, r2));
             set_volatile_region(&vol, r2);
             bot.pos = cpp;
             g_array_append_val(new_bots, bot);
@@ -133,9 +129,9 @@ exec_timestep (state_t *state, timestep_t ts) {
             coord_t cp = add_coords(c, cmd->Fission_nd);
 
             set_volatile(&vol, c);
-            assert(is_coord_valid(&state->matrix, cp));
+            assert(is_coord_valid(&state.matrix, cp));
             set_volatile(&vol, cp);
-            assert(get_voxel(&state->matrix, cp) == Empty);
+            assert(get_voxel(&state.matrix, cp) == Empty);
 
             uint8_t m = cmd->m;
             bot_t botp = make_bot(bot.seeds[0], cp, m, bot.seeds + 1);
@@ -150,27 +146,29 @@ exec_timestep (state_t *state, timestep_t ts) {
             coord_t cp = add_coords(c, cmd->Fill_nd);
 
             set_volatile(&vol, c);
-            assert(is_coord_valid(&state->matrix, cp));
+            assert(is_coord_valid(&state.matrix, cp));
             set_volatile(&vol, cp);
 
-            voxel_t v = get_voxel(&state->matrix, cp);
+            voxel_t v = get_voxel(&state.matrix, cp);
             if (v == Empty) {
-                set_voxel(&state->matrix, cp, Full);
+                set_voxel(&state.matrix, cp, Full);
             } else if (v == Full) {
                 // count energy
             } else {
                 assert(false);
             }
+
+            g_array_append_val(new_bots, bot);
             break;
         }
 
         case FusionP: {
             coord_t cp = add_coords(c, cmd->FusionP_nd);
             set_volatile(&vol, c);
-            assert(is_coord_valid(&state->matrix, cp));
+            assert(is_coord_valid(&state.matrix, cp));
             set_volatile(&vol, cp);
-            int j = find_fusion(state, ts, FusionS, cp);
-            bot_t bot_s = state->bots[j];
+            int j = find_fusion(&state, commands, FusionS, cp);
+            bot_t bot_s = state.bots[j];
             bot_t new_bot = make_bot(bot.bid, bot.pos, bot.n_seeds + 1 + bot_s.n_seeds, NULL);
             memcpy(new_bot.seeds, bot.seeds, sizeof(bid_t) * bot.n_seeds);
             new_bot.seeds[bot.n_seeds] = bot_s.bid;
@@ -182,8 +180,8 @@ exec_timestep (state_t *state, timestep_t ts) {
 
         case FusionS: {
             coord_t cp = add_coords(c, cmd->FusionS_nd);
-            assert(is_coord_valid(&state->matrix, cp));
-            find_fusion(state, ts, FusionP, cp);
+            assert(is_coord_valid(&state.matrix, cp));
+            find_fusion(&state, commands, FusionP, cp);
             break;
         }
 
@@ -200,4 +198,30 @@ exec_timestep (state_t *state, timestep_t ts) {
     new_state.bots = (bot_t*)g_array_free(new_bots, FALSE);
 
     return new_state;
+}
+
+matrix_t
+exec_trace (trace_t trace, resolution_t resolution) {
+    state_t state = make_state(0, Low, make_matrix(resolution));
+    bid_t *seeds = malloc(sizeof(bid_t) * 19);
+    for (int i = 0; i < 19; i++) {
+        seeds[i] = i + 2;
+    }
+    state.n_bots = 1;
+    state.bots = malloc(sizeof(bot_t) * 1);
+    state.bots[0] = make_bot(1, create_coord(0, 0, 0), 19, seeds);
+
+    int cmd_index = 0;
+
+    while (state.n_bots > 0) {
+        printf("exec %d with %d bots\n", cmd_index, state.n_bots);
+        for (int i = 0; i < state.n_bots; i++) {
+            print_cmd(trace.commands[cmd_index + i]);
+        }
+        assert(cmd_index + state.n_bots <= trace.n_commands);
+        state = exec_timestep(state, trace.commands + cmd_index);
+        cmd_index += state.n_bots;
+    }
+
+    return state.matrix;
 }

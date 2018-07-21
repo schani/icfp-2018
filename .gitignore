@@ -4,8 +4,9 @@ problemsL
 *.d
 *.o
 src/_test
+src/run_trace
 core.*
-generate_default_trace
+src/generate_default_trace
 submission/Traces/*
 Bertl/ascii2nbt
 Bertl/nbt2ascii

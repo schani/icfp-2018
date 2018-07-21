@@ -8,10 +8,11 @@
 
 #include "coord.h"
 #include "model.h"
+#include "trace.h"
 
 
 matrix_t
-make_matrix(int resolution)
+make_matrix(resolution_t resolution)
 {
     matrix_t m;
     m.resolution = resolution;
@@ -27,9 +28,20 @@ copy_matrix(matrix_t from)
     return m;
 }
 
+bool
+are_matrixes_equal(matrix_t a, matrix_t b) {
+    resolution_t res = a.resolution;
+    if (res != b.resolution) return false;
+    region_t r = make_region(create_coord(0, 0, 0), create_coord(res-1, res-1, res-1));
+    FOR_EACH_COORD(c, r) {
+        if (get_voxel(&a, c) != get_voxel(&b, c)) return false;
+    } END_FOR_EACH_COORD;
+    return true;
+}
+
 void
 free_matrix (matrix_t matrix) {
-        free(matrix.data);
+    free(matrix.data);
 }
 
 bool
@@ -54,7 +66,7 @@ read_model_file(char* filename) {
 
     xyz_t x = 0, y = 0, z = 0;
     coord_t c;
-    uint8_t resolution = file[0];
+    resolution_t resolution = file[0];
     matrix_t m = make_matrix(resolution);
 
     for (int offset = 1; offset < stats.st_size; offset++) {

@@ -3,9 +3,15 @@
 #include "state.h"
 
 state_t
-make_state (void) {
+make_state (energy_t energy, harmonics_t harmonics, matrix_t matrix) {
     state_t s;
-    memset(&s, 0, sizeof(state_t));
+    s.energy = energy;
+    s.harmonics = harmonics;
+    s.matrix = matrix;
+
+    s.n_bots = 0;
+    s.bots = NULL;
+
     return s;
 }
 

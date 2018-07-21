@@ -38,6 +38,8 @@ typedef struct {
 #define FusionS_nd coord1
 
 
+void print_cmd (command_t cmd);
+
 
 static inline command_t 
 halt_cmd(void)

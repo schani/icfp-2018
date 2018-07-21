@@ -2,14 +2,14 @@
 #define _MODEL_H
 
 #include <stdint.h>
-#include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
-#include <stdio.h>
+
 #include "coord.h"
 #include "trace.h"
 
 typedef uint8_t voxel_t;
+typedef uint8_t resolution_t;
 
 typedef enum {
     Empty = 0,
@@ -17,14 +17,14 @@ typedef enum {
 } voxel_state_t;
 
 typedef struct {
-    int resolution;
+    resolution_t resolution;
     voxel_t *data;
 } matrix_t;
 
 static bool
 is_coord_valid (matrix_t *m, coord_t c) {
     if (c.x < 0 || c.y < 0 || c.z < 0) return false;
-    int r = m->resolution;
+    resolution_t r = m->resolution;
     if (c.x >= r || c.y >= r || c.z >= r) return false;
     return true;
 }
@@ -47,9 +47,11 @@ set_voxel (matrix_t *m, coord_t c, voxel_t v) {
 
 bool region_is_empty (matrix_t *m, region_t r);
 
-matrix_t make_matrix(int resolution);
+matrix_t make_matrix(resolution_t resolution);
 
 matrix_t copy_matrix(matrix_t from);
+
+bool are_matrixes_equal(matrix_t a, matrix_t b);
 
 void free_matrix(matrix_t matrix);
 

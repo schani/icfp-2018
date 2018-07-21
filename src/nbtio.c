@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <glib.h>
+#include <gmodule.h>
+
 #include "nbtio.h"
 
 
@@ -240,3 +243,43 @@ int write_nbt_command(FILE *f, command_t *cmd)
 	return SUCCESS;
 }
 
+#define	ARRAY_SIZE	1024
+
+int
+read_trace(FILE *f, trace_t *t)
+{
+	GArray *a = g_array_sized_new(FALSE, FALSE, sizeof(command_t), ARRAY_SIZE);
+
+	while (1) {
+	    command_t cmd = { 0 };
+	    int r = read_nbt_command(f, &cmd);   
+
+	    if (r == ERR_EOF)
+			break;
+	    else if (r != SUCCESS) {
+			g_array_free(a, TRUE);
+			return r;
+		}
+
+	    g_array_append_val(a, cmd); 
+	}
+
+	t->n_commands = a->len;
+	t->commands = (command_t*)g_array_free(a, FALSE);
+
+	return SUCCESS;
+}
+
+int
+write_trace(FILE *f, trace_t t)
+{
+	for (int i=0; i<t.n_commands; i++) {
+	    command_t *cmd = &t.commands[i];
+	    
+	    int r = write_nbt_command(f, cmd);
+	    if (r != SUCCESS) {
+			return r;
+	    }
+	}
+	return SUCCESS;
+}

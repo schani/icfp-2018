@@ -18,15 +18,17 @@ typedef struct {
     bid_t *seeds; // immutable!!!
 } bot_t;
 
+typedef int64_t energy_t;
+
 typedef struct {
-    int energy;
+    energy_t energy;
     harmonics_t harmonics;
     matrix_t matrix;
     int n_bots;
     bot_t *bots;
 } state_t;
 
-state_t make_state (void);
+state_t make_state (energy_t energy, harmonics_t harmonics, matrix_t matrix);
 
 bot_t make_bot (bid_t bid, coord_t pos, int n_seeds, bid_t *seeds);
 

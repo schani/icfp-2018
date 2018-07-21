@@ -4,6 +4,8 @@
 int read_nbt_command(FILE *, command_t *);
 int write_nbt_command(FILE *, command_t *);
 
+int read_trace(FILE *f, trace_t *t);
+int write_trace(FILE *f, trace_t t);
 
 typedef enum {
     SUCCESS = 0,
