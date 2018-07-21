@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
 	/*  fprintf(stderr, ">%*.*s<\t", ci, ci, cmd);
 	    for (int i=0; i<ni; i++)
 		fprintf(stderr, "[%d]\t", num[i]);
-	    fprintf(stderr, "\n"); */
+	    fprintf(stderr, "\n");	*/
 
 	    if (COMP("HALT", cmd, ci)) {
 		if (ni)
@@ -359,7 +359,8 @@ int main(int argc, char *argv[])
 		putchar(0x03 | (nd << 3));
 	    }
 	    else {
-		goto error_cmd;
+		if (ci)
+		    goto error_cmd;
 	    }
 
 	    ni = 0;
