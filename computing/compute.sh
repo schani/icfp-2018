@@ -179,7 +179,7 @@ ${0##*/}: usage: ${0##*/} command
     run <dir> <binary> <arg-list-file> <result-dir> .. run binary in dir 
           with args found in arg-list-file, nodes will be used in paralell
     scan-keys .. scans for ssh host keys and displays them to stdout
-    renew-keys .. will renew all shh keys from ssh_keys.pub
+    renew-keys .. will renew all ssh keys from ssh_keys.pub
     check-nodes .. check if nodes are up (output of uname -a is shown)
 EOF
     bb_traps_disable
