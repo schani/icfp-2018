@@ -1,4 +1,5 @@
 #include "model.h"
+#include "plan.h"
 
 static bool
 is_filled (matrix_t *plan, coord_t c) {
@@ -16,25 +17,34 @@ has_filled_neighbors (matrix_t *plan, coord_t c) {
 }
 
 static bool
-fill (matrix_t *plan, matrix_t *model, coord_t c, voxel_t phase) {
+can_fill(matrix_t *phases, matrix_t *model, coord_t c) {
     if (get_voxel(model, c) == Empty) return false;
-    if (get_voxel(plan, c) != 0) return false;
+    if (get_voxel(phases, c) != 0) return false;
+    return true;
+}
 
-    set_voxel(plan, c, phase);
+static bool
+fill (matrix_t *phases, matrix_t *blobs, matrix_t *model, coord_t c, voxel_t phase, voxel_t blob) {
+    if (!can_fill(phases, model, c)) return false;
+
+    assert(get_voxel(blobs, c) == 0);
+
+    set_voxel(phases, c, phase);
+    set_voxel(blobs, c, blob);
 
     coord_t d;
 
     d = add_x(c, -1);
-    if (is_coord_valid(plan, d)) fill(plan, model, d, phase);
+    if (is_coord_valid(phases, d)) fill(phases, blobs, model, d, phase, blob);
 
     d = add_x(c, 1);
-    if (is_coord_valid(plan, d)) fill(plan, model, d, phase);
+    if (is_coord_valid(phases, d)) fill(phases, blobs, model, d, phase, blob);
 
     d = add_z(c, -1);
-    if (is_coord_valid(plan, d)) fill(plan, model, d, phase);
+    if (is_coord_valid(phases, d)) fill(phases, blobs, model, d, phase, blob);
 
     d = add_z(c, 1);
-    if (is_coord_valid(plan, d)) fill(plan, model, d, phase);
+    if (is_coord_valid(phases, d)) fill(phases, blobs, model, d, phase, blob);
 
     return true;
 }
@@ -51,10 +61,11 @@ plan_fills_model (matrix_t *plan, matrix_t *model) {
     return true;
 }
 
-matrix_t
-make_plan (matrix_t *model) {
+void
+make_plan (matrix_t *model, matrix_t *phases, matrix_t *blobs) {
     resolution_t res = model->resolution;
-    matrix_t plan = make_matrix(res);
+    *phases = make_matrix(res);
+    *blobs = make_matrix(res);
     int phase = 1;
 
     int direction = 1;
@@ -63,29 +74,75 @@ make_plan (matrix_t *model) {
         int start = direction > 0 ? 0 : res - 1;
         int end = direction > 0 ? res : -1;
         for (int y = start; y != end; y += direction) {
-            int num_fills = 0;
+            int num_blobs = 0;
             for (int x = 0; x < res; x++) {
                 for (int z = 0; z < res; z++) {
                     coord_t c = create_coord(x, y, z);
-                    if (y == 0 || (y - direction < res && get_voxel(&plan, add_y(c, -direction))) != 0 || has_filled_neighbors(&plan, c)) {
-                        if (fill(&plan, model, c, phase)) {
+                    if (y == 0 || (y - direction < res && get_voxel(phases, add_y(c, -direction))) != 0 || has_filled_neighbors(phases, c)) {
+                        if (can_fill(phases, model, c)) {
+                            num_blobs++;
+                            fill(phases, blobs, model, c, phase, num_blobs);
                             did_fill = true;
-                            num_fills++;
                         }
                     }
                 }
             }
-            if (num_fills > 0) {
-                printf("%d fills at y=%d in phase %d\n", num_fills, y, phase);
+            if (num_blobs > 0) {
+                printf("%d fills at y=%d in phase %d\n", num_blobs, y, phase);
             }
         }
         if (!did_fill) {
-            assert(plan_fills_model(&plan, model));
+            assert(plan_fills_model(phases, model));
             printf("%d phases\n", phase);
-            return plan;
+            return;
         }
 
         phase++;
         direction = -direction;
     }
+}
+
+
+void
+make_grounded (matrix_t *phases, matrix_t* grounded) {
+    region_t r = matrix_region(phases);
+    resolution_t res = phases->resolution;
+    *grounded = make_matrix(res);
+
+    FOR_EACH_COORD(c, r) {
+        if (get_voxel(phases, c) == 0) {
+            set_voxel(grounded, c, Free);
+            continue;
+        }
+        
+        // all filled phase-areas are by default = TransitiveGrounded
+        set_voxel(grounded, c, TransitiveGrounded);
+
+        if (get_voxel(phases, c) % 2 != 0)
+        {
+            // ODD: compare with layer below
+            if (c.y > 0) {
+                c.y -= 1;
+                if (get_voxel(phases, c) > 0) {
+                    // =filled
+                    set_voxel(grounded, c, Grounded);
+                }
+            }
+            else {
+                set_voxel(grounded, c, Grounded);
+            }
+        }
+        else 
+        {
+            // EVEN: compare with upper layer
+            if (c.y < r.c_max.y) {
+                c.y += 1;
+                if (get_voxel(phases, c) > 0) {
+                    // =filled
+                    set_voxel(grounded, c, Grounded);
+                }
+            }
+        }
+
+    } END_FOR_EACH_COORD;
 }

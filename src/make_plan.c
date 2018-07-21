@@ -7,8 +7,9 @@ main (int argc, char *argv[]) {
     }
 
     matrix_t model = read_model_file(argv[1]);
+    matrix_t phases, blobs;
 
-    make_plan(&model);
+    make_plan(&model, &phases, &blobs);
 
     return 0;
 }
