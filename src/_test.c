@@ -42,6 +42,7 @@
 
         case Fill: {
             printf("Fill    %d %d %d\n", cmd->Fill_nd.x, cmd->Fill_nd.y, cmd->Fill_nd.z);
+            break;
         }
 
         case FusionP: {
@@ -92,21 +93,16 @@ main()
     int i;
     for (i=0; i<cmds->len; i++) {
         command_t cmd = (command_t)g_array_index(cmds, command_t, i);
-<<<<<<< HEAD
         print_cmd(&cmd);
         //fprintf(stdout, "CMD#%i: %d (%i,%i,%i) (%i,%i,%i)\n", i, cmd.type, cmd.coord1.x, cmd.coord1.y, cmd.coord1.z, cmd.coord2.x, cmd.coord2.y, cmd.coord2.z);
-    }
-=======
-        fprintf(stdout, "CMD#%i: %d (%i,%i,%i) (%i,%i,%i)\n", i, cmd.type, cmd.coord1.x, cmd.coord1.y, cmd.coord1.z, cmd.coord2.x, cmd.coord2.y, cmd.coord2.z);
->>>>>>> 4319efab19c728d57d08b3be83c327ac6d90057b
 
         timestep_t tstmp;
         tstmp.n_commands = 1;
         tstmp.commands = &cmd;
         g_array_append_val(timesteps, tstmp);
+    
     }
 
-<<<<<<< HEAD
 
 
 
@@ -120,11 +116,6 @@ main()
         int n_timesteps;
         timestep_t *timesteps;
     } trace_t;*/
-=======
-    trace_t trace;
-    trace.timesteps = (timestep_t*)timesteps->data;
-    trace.n_timesteps = timesteps->len;
->>>>>>> 4319efab19c728d57d08b3be83c327ac6d90057b
 
     g_array_free (cmds, TRUE);
     g_array_free (timesteps, TRUE);
