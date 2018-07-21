@@ -68,7 +68,7 @@ is_grounded (matrix_t *model, coord_t c, int direction) {
     return y == 0 || (y - direction < res && get_voxel(model, add_y(c, -direction)) != 0) || has_filled_neighbors(model, c);
 }
 
-void
+int
 make_plan (matrix_t *model, matrix_t *phases, matrix_t *blobs) {
     region_t full_region = matrix_region(model);
     resolution_t res = model->resolution;
@@ -97,7 +97,7 @@ make_plan (matrix_t *model, matrix_t *phases, matrix_t *blobs) {
         if (!did_fill) {
             assert(plan_fills_model(phases, model));
             fprintf(stderr, "%d phases\n", phase - 1);
-            return;
+            return phase - 1;
         }
 
         phase++;
