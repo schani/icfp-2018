@@ -8,6 +8,7 @@ if [ -z "$1" ]
 fi
 
 GENTRACEDIR=../computing/result/
+TMPDIR=/tmp/icfp
 
 if [ -z "$(ls -A $GENTRACEDIR)" ]; then
     echo "no traces found"
@@ -15,12 +16,16 @@ if [ -z "$(ls -A $GENTRACEDIR)" ]; then
 fi
 
 echo "getting traces from $GENTRACEDIR"
-rm -rf /tmp/icfp/*
+if [ -d "$TMPDIR" ]; then
+    rm -rf "$TMPDIR/*"
+else
+    mkdir "$TMPDIR"
+fi
 for filename in $GENTRACEDIR/*.tar.gz; do
-    tar -C /tmp/icfp -xzf "$filename" ./result
+    tar -C "$TMPDIR" -xzf "$filename" ./result
 done
 rm -f Traces/*
-cp /tmp/icfp/result/*.nbt Traces/.
+cp "$TMPDIR/result/*.nbt" Traces/.
 
 REV=$(git rev-parse --short HEAD)
 TS=$(date +%Y%m%d_%H%M%S)

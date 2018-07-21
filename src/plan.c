@@ -93,7 +93,7 @@ make_plan (matrix_t *model, matrix_t *phases, matrix_t *blobs) {
         }
         if (!did_fill) {
             assert(plan_fills_model(phases, model));
-            printf("%d phases\n", phase);
+            printf("%d phases\n", (phase-1));
             return;
         }
 
@@ -115,15 +115,15 @@ make_grounded (matrix_t *phases, matrix_t* grounded) {
             continue;
         }
         
-        // all filled phase-areas are by default = TransitiveGrounded
+        // all remaining filled phase-areas are by default = TransitiveGrounded
         set_voxel(grounded, c, TransitiveGrounded);
 
         if (get_voxel(phases, c) % 2 != 0)
         {
             // ODD: compare with layer below
             if (c.y > 0) {
-                c.y -= 1;
-                if (get_voxel(phases, c) > 0) {
+                coord_t below = create_coord(c.x, c.y-1, c.z);
+                if (get_voxel(phases, below) > 0 && get_voxel(phases, below)<=get_voxel(phases, c)) {
                     // =filled
                     set_voxel(grounded, c, Grounded);
                 }
@@ -136,8 +136,8 @@ make_grounded (matrix_t *phases, matrix_t* grounded) {
         {
             // EVEN: compare with upper layer
             if (c.y < r.c_max.y) {
-                c.y += 1;
-                if (get_voxel(phases, c) > 0) {
+                coord_t above = create_coord(c.x, c.y+1, c.z);
+                if (get_voxel(phases, above) > 0 && get_voxel(phases, above)<=get_voxel(phases, c)) {
                     // =filled
                     set_voxel(grounded, c, Grounded);
                 }

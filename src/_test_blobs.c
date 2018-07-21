@@ -26,6 +26,8 @@ main()
     set_voxel(&testModel, create_coord(1,1,2), Full);
     set_voxel(&testModel, create_coord(2,1,2), Full);
     set_voxel(&testModel, create_coord(2,1,1), Full);
+    set_voxel(&testModel, create_coord(2,1,1), Full);
+
     // filled rectangle #2
     set_voxel(&testModel, create_coord(4,1,4), Full);
     set_voxel(&testModel, create_coord(5,1,4), Full);
@@ -36,6 +38,15 @@ main()
     set_voxel(&testModel, create_coord(4,1,6), Full);
     set_voxel(&testModel, create_coord(4,1,5), Full);
     set_voxel(&testModel, create_coord(5,1,5), Full);
+
+    //connect rectangles
+    set_voxel(&testModel, create_coord(2,2,2), Full);
+    set_voxel(&testModel, create_coord(3,2,2), Full);
+    set_voxel(&testModel, create_coord(4,2,2), Full);
+    set_voxel(&testModel, create_coord(4,2,3), Full);
+    set_voxel(&testModel, create_coord(4,2,4), Full);
+
+
         
     matrix_t phases = make_matrix(res);
     matrix_t blobs = make_matrix(res);
@@ -45,7 +56,9 @@ main()
 
     region_t r = matrix_region(&grounded);
     FOR_EACH_COORD(c, r) {
-        printf("Coordinate (%i,%i,%i) --> %d\n", c.x, c.y, c.z, get_voxel(&grounded, c)); 
+        if (get_voxel(&grounded, c) > 0) {
+            printf("Coordinate (%i,%i,%i) --> %d\n", c.x, c.y, c.z, get_voxel(&grounded, c)); 
+        }
     } END_FOR_EACH_COORD;
 
     return 0;
