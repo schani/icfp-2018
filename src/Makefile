@@ -5,22 +5,19 @@ CFLAGS = -Werror -O2 -std=c99 -g \
 LDFLAGS = -lgc
 LDLIBS = $(shell pkg-config --libs glib-2.0)
 
-BINS = _test generate_default_trace run_trace make_plan
+MAINS = _test nbtio_test generate_default_trace run_trace make_plan
+MAIN_OBJS = $(patsubst %, %.o, $(MAINS))
 
 SRCS = $(filter-out nbtio_test%, $(wildcard *.c))
 OBJS = $(SRCS:.c=.o)
 DEPS = $(OBJS:.o=.d)
 
-all: $(BINS)
+all: $(MAINS)
 
-# FIXME: generalize this again
-_test: $(filter-out generate_default_trace% run_trace% make_plan%, $(OBJS)) 
-generate_default_trace: $(filter-out _test% run_trace% make_plan%, $(OBJS))
-run_trace: $(filter-out _test% generate_default_trace% make_plan%, $(OBJS))
-make_plan: $(filter-out _test% generate_default_trace% run_trace%, $(OBJS))
+$(MAINS): $(filter-out $(MAIN_OBJS), $(OBJS))
 
 clean:
-	rm -f *~ *.o *.d $(BINS)
+	rm -f *~ *.o *.d $(MAINS)
 
 .PHONY: all clean
 
