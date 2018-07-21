@@ -205,11 +205,17 @@ int	route_bot(matrix_t *m, coord_t *pos, coord_t *end, command_t *cmd)
 	    /* else
 		evade(m, pos, end, cmd); */
 
-	    cmd->type = SMove;
-	    cmd->SMove_lld = (coord_t)
-		{stop.x-pos->x, stop.y-pos->y, stop.z-pos->z};
+	    if (r == ERR_HIT) {
+		cmd->type = Wait;
 
-	    *end = stop;
+		*end = *pos;
+	    } else {
+		cmd->type = SMove;
+		cmd->SMove_lld = (coord_t)
+		    {stop.x-pos->x, stop.y-pos->y, stop.z-pos->z};
+
+		*end = stop;
+	    }
 	    return r;
 
 	} else if (type == Move_LMove) {
@@ -230,13 +236,19 @@ int	route_bot(matrix_t *m, coord_t *pos, coord_t *end, command_t *cmd)
 		    evade(m, pos, end, cmd); */
 	    }
 
-	    cmd->type = LMove;
-	    cmd->LMove_sld1 = (coord_t)
-		{mid.x-pos->x, mid.y-pos->y, mid.z-pos->z};
-	    cmd->LMove_sld2 = (coord_t)
-		{stop.x-mid.x, stop.y-mid.y, stop.z-mid.z};
+	    if (r == ERR_HIT) {
+		cmd->type = Wait;
 
-	    *end = stop;
+		*end = *pos;
+	    } else {
+		cmd->type = LMove;
+		cmd->LMove_sld1 = (coord_t)
+		    {mid.x-pos->x, mid.y-pos->y, mid.z-pos->z};
+		cmd->LMove_sld2 = (coord_t)
+		    {stop.x-mid.x, stop.y-mid.y, stop.z-mid.z};
+
+		*end = stop;
+	    }
 	    return r;
 
 	} else {  // What now?
