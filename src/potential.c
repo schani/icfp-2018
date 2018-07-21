@@ -3,7 +3,11 @@
 #include "potential.h"
 
 
-
+/* checks if given voxed is active in current phase */
+static inline bool
+is_voxel_active(coord_t v, matrix_t * phases, matrix_t * blobs, int n_blob, int n_phase){
+    return (get_voxel(phases, v) == n_phase && get_voxel(blobs, v) == n_blob);
+}
 
 /* calcs the number of grounded voxels */
 int 
@@ -15,7 +19,7 @@ calc_num_grounded(matrix_t * m_grounded, matrix_t * phases, matrix_t * blobs, in
     for (int x = 0; x < res; x++) {
         for (int z = 0; z < res; z++) {
             coord_t c = create_coord(x, y, z);
-            if (get_voxel(phases, c) == n_phase && get_voxel(blobs, c) == n_blob) {
+            if (is_voxel_active(c, phases, blobs, n_blob, n_phase)){
                 if (get_voxel(m_grounded, c) == Grounded){
                     num_grounded += 1;
                 }
@@ -25,11 +29,7 @@ calc_num_grounded(matrix_t * m_grounded, matrix_t * phases, matrix_t * blobs, in
     return num_grounded;
 }
 
-/* checks if given voxed is active in current phase */
-static inline bool
-is_voxel_active(coord_t v, matrix_t * phases, matrix_t * blobs, int n_blob, int n_phase){
-    return (get_voxel(phases, v) == n_phase && get_voxel(blobs, v) == n_blob);
-}
+
 
 
 GArray * 

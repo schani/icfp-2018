@@ -4,8 +4,6 @@
 #include "model.h"
 #include "coord.h"
 #include <gmodule.h>
-#include "area_detect.h"
-
 
 
 int 
