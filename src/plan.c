@@ -63,13 +63,20 @@ make_plan (matrix_t *model) {
         int start = direction > 0 ? 0 : res - 1;
         int end = direction > 0 ? res : -1;
         for (int y = start; y != end; y += direction) {
+            int num_fills = 0;
             for (int x = 0; x < res; x++) {
                 for (int z = 0; z < res; z++) {
                     coord_t c = create_coord(x, y, z);
                     if (y == 0 || (y - direction < res && get_voxel(&plan, add_y(c, -direction))) != 0 || has_filled_neighbors(&plan, c)) {
-                        did_fill = fill(&plan, model, c, phase) || did_fill;
+                        if (fill(&plan, model, c, phase)) {
+                            did_fill = true;
+                            num_fills++;
+                        }
                     }
                 }
+            }
+            if (num_fills > 0) {
+                printf("%d fills at y=%d in phase %d\n", num_fills, y, phase);
             }
         }
         if (!did_fill) {
