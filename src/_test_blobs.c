@@ -8,6 +8,7 @@
 #include "trace.h"
 #include "plan.h"
 #include "potential.h"
+#include "area.h"
 
 
 void fill_rectangle_2d(matrix_t *m, int x_start, int y_fixed, int z_start, int x_len, int z_len) {
@@ -63,7 +64,6 @@ main()
         //}
     } END_FOR_EACH_COORD;
 
-  printf("woran liegts\n");
     // iterate through phases and blobs, calc potential
     
     /*for (int x = 0; x < res; x++) {
@@ -80,6 +80,17 @@ main()
 
     //printf("Potential --> %d\n", ); 
 
+    GArray* a;
+    area_t area;
+    a = find_areas(&phases, &blobs, 1, 1);
+    assert(a->len == 1);
+    area =  g_array_index(a, area_t, 0);
+    region_t box1 =  make_region(create_coord(1, 1, 1), create_coord(2, 1, 2));
+    assert(region_equal(&area.bounding_box, &box1));
+    a = find_areas(&phases, &blobs, 1, 2);
+    assert(a->len == 1);
+    a = find_areas(&phases, &blobs, 2, 1);
+    assert(a->len == 1);
 
     return 0;
 }

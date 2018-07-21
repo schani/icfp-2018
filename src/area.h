@@ -11,11 +11,11 @@ typedef struct {
     region_t bounding_box;
     int phase;
     int blob_id;
-    int potential;
+    int potential; 
 } area_t;
 
 // FIXME: implement
-// GArray* find_areas(matrix_t* m, int phase, int y);
+GArray* find_areas(matrix_t* phases, matrix_t* blobs, int phase, int y);
 
 
 #endif /* _AREA_H */
