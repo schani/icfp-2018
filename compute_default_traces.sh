@@ -32,8 +32,8 @@ function main() {
     local binfile bindir
     for bin in "${BINS[@]}"
     do
-	binfile=${bin##*/}
-	bindir=${bin%/*}
+	binfile="${bin##*/}"
+	bindir="${bin%/*}"
 	make -C "$bindir" "$binfile" || \
 	    fatal "failed to: make -C '$bindir' '$binfile'"
 	cp "$bin" "$BUILDDIR/." || fatal "failed to: '$bin' '$BUILDDIR/.'"
@@ -50,7 +50,7 @@ function main() {
 #!/bin/bash
 
 mkdir -p result
-./generate_default_trace input-models/\$1 | ./ascii2nbt > result/\${1#.mdl}.nbt
+./generate_default_trace input-models/\$1 | ./ascii2nbt > result/\${1%_tgt.mdl}.nbt
 EOF
     chmod +x "$BUILDDIR/run.sh"
 
