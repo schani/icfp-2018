@@ -103,19 +103,9 @@ main()
     
     }
 
-
-
-
-    /*
-    typedef struct {
-        int n_commands;
-        command_t *commands;
-    } timestep_t;
-
-    typedef struct {
-        int n_timesteps;
-        timestep_t *timesteps;
-    } trace_t;*/
+    trace_t trace;
+    trace.timesteps = (timestep_t*)timesteps->data;
+    trace.n_timesteps = timesteps->len;
 
     g_array_free (cmds, TRUE);
     g_array_free (timesteps, TRUE);

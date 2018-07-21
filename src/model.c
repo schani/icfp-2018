@@ -74,4 +74,5 @@ read_model_file(char* filename) {
             }
         }
     }
+    assert(false);
 }
