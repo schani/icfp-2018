@@ -237,16 +237,16 @@ exec_trace (trace_t trace, resolution_t resolution) {
     int cmd_index = 0;
 
     while (state.n_bots > 0) {
-        printf("exec %d with %d bots\n", cmd_index, state.n_bots);
+        // printf("exec %d with %d bots\n", cmd_index, state.n_bots);
         for (int i = 0; i < state.n_bots; i++) {
-            print_cmd(trace.commands[cmd_index + i]);
+            // print_cmd(trace.commands[cmd_index + i]);
         }
         assert(cmd_index + state.n_bots <= trace.n_commands);
         state = exec_timestep(state, trace.commands + cmd_index);
         cmd_index += state.n_bots;
     }
 
-    printf("energy used: %lld\n", state.energy);
+    printf("%lld\n", state.energy);
 
     return state.matrix;
 }
