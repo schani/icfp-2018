@@ -3,6 +3,7 @@
 #include "plan.h"
 #include "execution.h"
 #include "default_trace.h"
+#include "route.h"
 
 // each element in starting_pos will be the starting pos for the respective bot
 void
@@ -154,13 +155,26 @@ exec_cmd (state_t *state, command_t cmd) {
 static void
 goto_pos (state_t *state, coord_t next_pos) {
     assert(state->n_bots == 1);
-    coord_t cur_pos = state->bots[0].pos;
-    GArray *cmds = g_array_new(FALSE, FALSE, sizeof(command_t));
-	goto_next_pos(&cur_pos, next_pos, cmds);
-    for (int i = 0; i < cmds->len; i++) {
-        exec_cmd(state, g_array_index(cmds, command_t, i));
+
+    for (;;) {
+        coord_t cur_pos = state->bots[0].pos;
+
+        // printf("stepping from %d %d %d to %d %d %d\n", cur_pos.x, cur_pos.y, cur_pos.z, next_pos.x, next_pos.y, next_pos.z);
+
+        matrix_t m = copy_matrix(state->matrix);
+        coord_t stop;
+        command_t cmd;
+        result_t result;
+        int err = route_bots(&m, 1, &cur_pos, &next_pos, &stop, &cmd, &result);
+        assert(err == 0);
+
+        exec_cmd(state, cmd);
+
+        if (result == SUCCESS) {
+            assert(is_coords_equal(state->bots[0].pos, next_pos));
+            return;
+        }
     }
-    g_array_free(cmds, TRUE);
 }
 
 static int

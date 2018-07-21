@@ -61,7 +61,7 @@ int	mark_move(matrix_t *m, coord_t *pos, coord_t *stop, const coord_t *dir, int 
 	    if (lim)
 		lim--;
 	    else {
-		printf("limit reached (%d left)\n", cnt);
+		// printf("limit reached (%d left)\n", cnt);
 		break;
 	    }
 
@@ -72,8 +72,8 @@ int	mark_move(matrix_t *m, coord_t *pos, coord_t *stop, const coord_t *dir, int 
 		curr = new;
 		cnt--;
 	    } else {	// we hit something
-		printf("we hit something (%d) at <%d,%d,%d>\n", 
-		    get_voxel(m, new), new.x, new.y, new.z);
+		// printf("we hit something (%d) at <%d,%d,%d>\n", 
+		//     get_voxel(m, new), new.x, new.y, new.z);
 		break;
 	    }
 	}
@@ -81,9 +81,9 @@ int	mark_move(matrix_t *m, coord_t *pos, coord_t *stop, const coord_t *dir, int 
 	if (stop)
 	    *stop = curr;
 
-	printf("*move <%d,%d,%d> -> <%d,%d,%d>\n",
-	    pos->x, pos->y, pos->z,
-	    curr.x, curr.y, curr.z);
+	// printf("*move <%d,%d,%d> -> <%d,%d,%d>\n",
+	//     pos->x, pos->y, pos->z,
+	//     curr.x, curr.y, curr.z);
 
 	if (cnt) {
 	    if (lim)
@@ -97,9 +97,9 @@ int	mark_smove(matrix_t *m, coord_t *pos, coord_t *stop, const coord_t *dir, int
 {
 	result_t r = mark_move(m, pos, stop, dir, cnt, 15, mark);	
 
-	printf("smove <%d,%d,%d> -> <%d,%d,%d> [%d]\n",
-	    pos->x, pos->y, pos->z,
-	    stop->x, stop->y, stop->z, r);
+	// printf("smove <%d,%d,%d> -> <%d,%d,%d> [%d]\n",
+	//     pos->x, pos->y, pos->z,
+	//     stop->x, stop->y, stop->z, r);
 	return r;
 }
 
@@ -110,10 +110,10 @@ int	mark_lmove(matrix_t *m, coord_t *pos, coord_t *mid, coord_t *stop, const coo
 	result_t r1 = mark_move(m, pos, mid, d1, c1, 5, mark);	
 	result_t r2 = mark_move(m, mid, stop, d2, c2, 5, mark);	
 	
-	printf("lmove <%d,%d,%d> -> <%d,%d,%d> -> <%d,%d,%d> [%d,%d]\n",
-	    pos->x, pos->y, pos->z,
-	    mid->x, mid->y, mid->z,
-	    stop->x, stop->y, stop->z, r1, r2);
+	// printf("lmove <%d,%d,%d> -> <%d,%d,%d> -> <%d,%d,%d> [%d,%d]\n",
+	//     pos->x, pos->y, pos->z,
+	//     mid->x, mid->y, mid->z,
+	//     stop->x, stop->y, stop->z, r1, r2);
 	   
 	if ((r1 == ERR_HIT) || (r2 == ERR_HIT))
 	    return ERR_HIT;
@@ -141,10 +141,10 @@ int	route_bot(matrix_t *m, coord_t *pos, coord_t *end, command_t *cmd)
 	int dy = end->y - pos->y;	
 	int dz = end->z - pos->z;	
 
-	printf("\nroute <%d,%d,%d> -> <%d,%d,%d> = [%d,%d,%d]\n",
-	    pos->x, pos->y, pos->z,
-	    end->x, end->y, end->z,
-	    dx, dy, dz);
+	// printf("\nroute <%d,%d,%d> -> <%d,%d,%d> = [%d,%d,%d]\n",
+	//     pos->x, pos->y, pos->z,
+	//     end->x, end->y, end->z,
+	//     dx, dy, dz);
 
 	coord_t d1, d2;
 	unsigned c1, c2;
@@ -191,7 +191,7 @@ int	route_bot(matrix_t *m, coord_t *pos, coord_t *end, command_t *cmd)
 	    c1 = abs(dy);
 	    type = Move_SMove;
 
-	    printf("3d move -> smove (dy)\n");
+	    // printf("3d move -> smove (dy)\n");
 	}
 
 	if (type == Move_SMove) {
@@ -199,7 +199,7 @@ int	route_bot(matrix_t *m, coord_t *pos, coord_t *end, command_t *cmd)
 
 	    result_t r = test_smove(m, pos, &stop, &d1, c1);
 		
-	    printf("smove test r=%d\n", r);
+	    // printf("smove test r=%d\n", r);
 	    if ((r == SUCCESS) || (r == ERR_SHORT))
 		mark_smove(m, pos, &stop, &d1, c1, 42);
 	    /* else
@@ -223,13 +223,13 @@ int	route_bot(matrix_t *m, coord_t *pos, coord_t *end, command_t *cmd)
 
 	    result_t r = test_lmove(m, pos, &mid, &stop, &d1, c1, &d2, c2);
 
-	    printf("lmove test r=%d\n", r);
+	    // printf("lmove test r=%d\n", r);
 	    if ((r == SUCCESS) || (r == ERR_SHORT))
 		mark_lmove(m, pos, &mid, &stop, &d1, c1, &d2, c2, 42);
 	    else {	// Try alternative
 		r = test_lmove(m, pos, &mid, &stop, &d2, c2, &d1, c1);
 
-		printf("lmove test r=%d\n", r);
+		// printf("lmove test r=%d\n", r);
 		if ((r == SUCCESS) || (r == ERR_SHORT))
 		    mark_lmove(m, pos, &mid, &stop, &d1, c1, &d2, c2, 42);
 		/* else
@@ -285,7 +285,7 @@ int	route_bots(matrix_t *m, int n, coord_t *pos, coord_t *end, coord_t *stop, co
 
 		int new = cost_func(&pos[i], &end[sel[i]]);
 
-		printf("[%d] -> [%d] = %d\n", i, sel[i], new);
+		// printf("[%d] -> [%d] = %d\n", i, sel[i], new);
 		
 		if (new < cost) {
 		    cost = new;
