@@ -127,6 +127,7 @@ int	mark_lmove(matrix_t *m, coord_t *pos, coord_t *mid, coord_t *stop, const coo
 typedef
 enum {	
 	Move_Unknown = 0,
+	Move_NoMove,
 	Move_SMove,
 	Move_LMove,
 } move_t;
@@ -142,16 +143,19 @@ int	route_bot(matrix_t *m, coord_t *pos, coord_t *end, command_t *cmd)
 	int dz = end->z - pos->z;	
 	int partial = 0;
 
-	// printf("\nroute <%d,%d,%d> -> <%d,%d,%d> = [%d,%d,%d]\n",
-	//     pos->x, pos->y, pos->z,
-	//     end->x, end->y, end->z,
-	//     dx, dy, dz);
+	printf("# route <%d,%d,%d> -> <%d,%d,%d> = [%d,%d,%d]\n",
+	    pos->x, pos->y, pos->z,
+	    end->x, end->y, end->z,
+	    dx, dy, dz);
 
 	coord_t d1, d2;
 	unsigned c1, c2;
 	move_t type = Move_Unknown;
 
-	if ((dx == 0) && (dy == 0)) {		// Straight dz
+	if ((dx == 0) && (dy == 0) && (dz == 0)) {
+	    type = Move_NoMove;
+
+	} else if ((dx == 0) && (dy == 0)) {	// Straight dz
 	    d1 = (coord_t){0, 0, sign(dz)};
 	    c1 = abs(dz);
 	    type = Move_SMove;
@@ -257,6 +261,11 @@ int	route_bot(matrix_t *m, coord_t *pos, coord_t *end, command_t *cmd)
 	    }
 	    return r;
 
+	} else if (type == Move_NoMove) {
+	    cmd->type = Wait;
+	    *end = *pos;
+	    return SUCCESS;
+
 	} else {  // What now?
 
 	    cmd->type = Wait;
@@ -302,6 +311,13 @@ int	route_bots(matrix_t *m, int n, coord_t *pos, coord_t *end, coord_t *stop, co
 	    fix[pick] = 1;
 	    stop[sel[pick]] = end[sel[pick]];
 	    status[pick] = route_bot(m, &pos[pick], &stop[sel[pick]], &cmd[pick]);
+
+	    printf("# [%d] cmd=%d <%d,%d,%d> <%d,%d,%d> <%d> [%d]\n",
+                pick, cmd[pick].type,
+                cmd[pick].coord1.x, cmd[pick].coord1.y, cmd[pick].coord1.z,
+                cmd[pick].coord2.x, cmd[pick].coord2.y, cmd[pick].coord2.z,
+                cmd[pick].m, status[pick]);
+
 	}
 	return 0;
 }
