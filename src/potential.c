@@ -61,7 +61,8 @@ get_frontier(matrix_t * m_grounded, matrix_t * phases, matrix_t * blobs, int n_b
     }
 }
 
-
+/* more interesting potential function taking into consideration the number of grounded voxels
+   plus the frontier to the transitive grounded voxels */
 int 
 calc_potential_grounded_plus_frontier(matrix_t * m_grounded, matrix_t * phases, matrix_t * blobs, int n_blob, int n_phase, int y){
     int pot = 0;
