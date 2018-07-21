@@ -2,13 +2,15 @@
 #include "model.h"
 
 typedef struct {
+    state_t state;
+    command_t *commands;
     matrix_t vol;
     GArray *new_bots;
     state_t new_state;
 } execution_t;
 
-execution_t start_timestep (state_t state);
-state_t finish_timestep (execution_t exec);
+execution_t start_timestep (state_t state, command_t *commands);
+state_t finish_timestep (execution_t *exec);
 
 matrix_t exec_trace (trace_t trace, resolution_t resolution);
 
