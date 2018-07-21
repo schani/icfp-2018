@@ -59,11 +59,22 @@ compare_bots (const void *p1, const void *p2) {
 
 static state_t
 exec_timestep (state_t state, command_t *commands) {
+    energy_t res = state.matrix.resolution;
     // FIXME: This is highly inefficient
-    matrix_t vol = make_matrix(state.matrix.resolution);
+    matrix_t vol = make_matrix(res);
     GArray *new_bots = g_array_new(FALSE, FALSE, sizeof(bot_t));
 
     state_t new_state = make_state(state.energy, state.harmonics, state.matrix);
+
+    if (state.harmonics == High) {
+        new_state.energy += 30 * res * res * res;
+    } else if (state.harmonics == Low) {
+        new_state.energy += 3 * res * res * res;
+    } else {
+        assert(false);
+    }
+
+    new_state.energy += 20 * state.n_bots;
 
     for (int i = 0; i < state.n_bots; i++) {
         bot_t bot = state.bots[i];
@@ -97,19 +108,24 @@ exec_timestep (state_t state, command_t *commands) {
             break;
 
         case SMove: {
-            coord_t cp = add_coords(c, cmd->SMove_lld);
+            coord_t lld = cmd->SMove_lld;
+            coord_t cp = add_coords(c, lld);
             assert(is_coord_valid(&state.matrix, cp));
             region_t r = make_region(c, cp);
             assert(region_is_empty(&state.matrix, r));
             set_volatile_region(&vol, r);
             bot.pos = cp;
             g_array_append_val(new_bots, bot);
+
+            new_state.energy += 2 * get_mlen(lld);
             break;
         }
 
         case LMove: {
-            coord_t cp = add_coords(c, cmd->LMove_sld1);
-            coord_t cpp = add_coords(cp, cmd->LMove_sld2);
+            coord_t sld1 = cmd->LMove_sld1;
+            coord_t sld2 = cmd->LMove_sld2;
+            coord_t cp = add_coords(c, sld1);
+            coord_t cpp = add_coords(cp, sld2);
             region_t r1 = make_region(c, cp);
             region_t r2 = make_region(cp, cpp);
 
@@ -121,6 +137,8 @@ exec_timestep (state_t state, command_t *commands) {
             set_volatile_region(&vol, r2);
             bot.pos = cpp;
             g_array_append_val(new_bots, bot);
+
+            new_state.energy += 2 * (get_mlen(sld1) + 2 + get_mlen(sld2));
             break;
         }
 
@@ -139,6 +157,8 @@ exec_timestep (state_t state, command_t *commands) {
 
             g_array_append_val(new_bots, bot);
             g_array_append_val(new_bots, botp);
+
+            new_state.energy += 24;
             break;
         }
 
@@ -152,8 +172,9 @@ exec_timestep (state_t state, command_t *commands) {
             voxel_t v = get_voxel(&state.matrix, cp);
             if (v == Empty) {
                 set_voxel(&state.matrix, cp, Full);
+                new_state.energy += 12;
             } else if (v == Full) {
-                // count energy
+                new_state.energy += 6;
             } else {
                 assert(false);
             }
@@ -175,6 +196,8 @@ exec_timestep (state_t state, command_t *commands) {
             memcpy(new_bot.seeds + bot.n_seeds + 1, bot_s.seeds, sizeof(bid_t) * bot_s.n_seeds);
             qsort(new_bot.seeds, new_bot.n_seeds, sizeof(bid_t), compare_bids);
             g_array_append_val(new_bots, new_bot);
+
+            new_state.energy -= 24;
             break;
         }
 
@@ -223,5 +246,7 @@ exec_trace (trace_t trace, resolution_t resolution) {
         cmd_index += state.n_bots;
     }
 
+    printf("energy used: %lld\n", state.energy);
+    
     return state.matrix;
 }
