@@ -1,11 +1,11 @@
 #include <assert.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include <gmodule.h>
 
 #include "state.h"
-
-#include <string.h>
+#include "execution.h"
 
 typedef enum {
     NonVolatile = 0,
@@ -66,15 +66,8 @@ exec_timestep (state_t state, command_t *commands) {
 
     state_t new_state = make_state(state.energy, state.harmonics, state.matrix);
 
-    if (state.harmonics == High) {
-        new_state.energy += 30 * res * res * res;
-    } else if (state.harmonics == Low) {
-        new_state.energy += 3 * res * res * res;
-    } else {
-        assert(false);
-    }
-
-    new_state.energy += 20 * state.n_bots;
+    new_state.energy += timestep_energy(&state);
+    new_state.energy += bot_energy(&state);
 
     for (int i = 0; i < state.n_bots; i++) {
         bot_t bot = state.bots[i];
@@ -117,7 +110,7 @@ exec_timestep (state_t state, command_t *commands) {
             bot.pos = cp;
             g_array_append_val(new_bots, bot);
 
-            new_state.energy += 2 * get_mlen(lld);
+            new_state.energy += smove_energy(lld);
             break;
         }
 
@@ -138,7 +131,7 @@ exec_timestep (state_t state, command_t *commands) {
             bot.pos = cpp;
             g_array_append_val(new_bots, bot);
 
-            new_state.energy += 2 * (get_mlen(sld1) + 2 + get_mlen(sld2));
+            new_state.energy += lmove_energy(sld1, sld2);
             break;
         }
 
@@ -158,7 +151,7 @@ exec_timestep (state_t state, command_t *commands) {
             g_array_append_val(new_bots, bot);
             g_array_append_val(new_bots, botp);
 
-            new_state.energy += 24;
+            new_state.energy += fission_energy();
             break;
         }
 
@@ -170,14 +163,8 @@ exec_timestep (state_t state, command_t *commands) {
             set_volatile(&vol, cp);
 
             voxel_t v = get_voxel(&state.matrix, cp);
-            if (v == Empty) {
-                set_voxel(&state.matrix, cp, Full);
-                new_state.energy += 12;
-            } else if (v == Full) {
-                new_state.energy += 6;
-            } else {
-                assert(false);
-            }
+            set_voxel(&state.matrix, cp, Full);
+            new_state.energy += fill_energy(v == Empty);
 
             g_array_append_val(new_bots, bot);
             break;
@@ -197,7 +184,7 @@ exec_timestep (state_t state, command_t *commands) {
             qsort(new_bot.seeds, new_bot.n_seeds, sizeof(bid_t), compare_bids);
             g_array_append_val(new_bots, new_bot);
 
-            new_state.energy -= 24;
+            new_state.energy -= fusion_energy();
             break;
         }
 
