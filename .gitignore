@@ -5,6 +5,7 @@ problemsL
 *.df
 *.o
 src/_test
+src/_test_blobs
 src/run_trace
 src/generate_default_trace
 src/make_plan
