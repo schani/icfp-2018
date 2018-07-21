@@ -10,6 +10,7 @@ typedef struct {
 } region_t;
 
 region_t make_region (coord_t c1, coord_t c2);
+bool region_equal(region_t* r1, region_t* r2);
 
 #define FOR_EACH_COORD_XZ(c, _y, r) \
     { \
