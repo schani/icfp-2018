@@ -79,7 +79,7 @@ start_timestep (state_t state, command_t *commands) {
 
 state_t
 finish_timestep (execution_t *exec) {
-    free_matrix(exec->vol);
+    free_matrix(&exec->vol);
 
     g_array_sort(exec->new_bots, compare_bots);
 
@@ -219,7 +219,7 @@ exec_bot (execution_t *exec, bot_t bot, command_t cmd) {
     }
 }
 
-static state_t
+state_t
 exec_timestep (state_t state, command_t *commands) {
     execution_t exec = start_timestep(state, commands);
 
@@ -233,15 +233,7 @@ exec_timestep (state_t state, command_t *commands) {
 
 matrix_t
 exec_trace (trace_t trace, resolution_t resolution) {
-    state_t state = make_state(0, Low, make_matrix(resolution));
-    bid_t *seeds = malloc(sizeof(bid_t) * 19);
-    for (int i = 0; i < 19; i++) {
-        seeds[i] = i + 2;
-    }
-    state.n_bots = 1;
-    state.bots = malloc(sizeof(bot_t) * 1);
-    state.bots[0] = make_bot(1, create_coord(0, 0, 0), 19, seeds);
-
+    state_t state = make_start_state(resolution);
     int cmd_index = 0;
 
     while (state.n_bots > 0) {

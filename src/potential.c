@@ -1,7 +1,5 @@
-
-
 #include "potential.h"
-
+#include "plan.h"
 
 /* checks if given voxed is active in current phase */
 static inline bool

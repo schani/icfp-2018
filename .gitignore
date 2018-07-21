@@ -10,6 +10,7 @@ src/run_trace
 src/generate_default_trace
 src/make_plan
 src/nbtio_test
+src/build
 core.*
 submission/Traces/*
 Bertl/ascii2nbt
