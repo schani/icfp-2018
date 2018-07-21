@@ -76,29 +76,37 @@ main()
     testModel.data = tmp;
    
     set_voxel(&testModel, create_coord(2,0,1), Full);
-    set_voxel(&testModel, create_coord(3,0,3), Full);
-    set_voxel(&testModel, create_coord(3,3,4), Full);
-    /*set_voxel(&testModel, create_coord(3,1,1), Full);
+    set_voxel(&testModel, create_coord(3,0,1), Full);
+    set_voxel(&testModel, create_coord(3,1,1), Full);
+    set_voxel(&testModel, create_coord(3,2,1), Full);
+    set_voxel(&testModel, create_coord(3,3,1), Full);
+    set_voxel(&testModel, create_coord(4,3,1), Full);
+    set_voxel(&testModel, create_coord(4,2,1), Full);
     set_voxel(&testModel, create_coord(4,1,1), Full);
-    set_voxel(&testModel, create_coord(5,1,1), Full);
-    set_voxel(&testModel, create_coord(6,1,1), Full);
-    set_voxel(&testModel, create_coord(7,1,1), Full);
-    set_voxel(&testModel, create_coord(8,1,1), Full);
-    set_voxel(&testModel, create_coord(9,1,1), Full);
-    set_voxel(&testModel, create_coord(9,2,2), Full);
-    */
+    set_voxel(&testModel, create_coord(4,0,1), Full);
+    
     GArray *cmds = NULL;
+    GArray *timesteps = g_array_new(FALSE, FALSE, sizeof(timestep_t));
     cmds = exec_default_trace(&testModel);
-    
-    
+        
     int i;
     for (i=0; i<cmds->len; i++) {
         command_t cmd = (command_t)g_array_index(cmds, command_t, i);
+<<<<<<< HEAD
         print_cmd(&cmd);
         //fprintf(stdout, "CMD#%i: %d (%i,%i,%i) (%i,%i,%i)\n", i, cmd.type, cmd.coord1.x, cmd.coord1.y, cmd.coord1.z, cmd.coord2.x, cmd.coord2.y, cmd.coord2.z);
     }
+=======
+        fprintf(stdout, "CMD#%i: %d (%i,%i,%i) (%i,%i,%i)\n", i, cmd.type, cmd.coord1.x, cmd.coord1.y, cmd.coord1.z, cmd.coord2.x, cmd.coord2.y, cmd.coord2.z);
+>>>>>>> 4319efab19c728d57d08b3be83c327ac6d90057b
 
+        timestep_t tstmp;
+        tstmp.n_commands = 1;
+        tstmp.commands = &cmd;
+        g_array_append_val(timesteps, tstmp);
+    }
 
+<<<<<<< HEAD
 
 
 
@@ -112,8 +120,14 @@ main()
         int n_timesteps;
         timestep_t *timesteps;
     } trace_t;*/
+=======
+    trace_t trace;
+    trace.timesteps = (timestep_t*)timesteps->data;
+    trace.n_timesteps = timesteps->len;
+>>>>>>> 4319efab19c728d57d08b3be83c327ac6d90057b
 
     g_array_free (cmds, TRUE);
+    g_array_free (timesteps, TRUE);
 
     return 0;
 }
