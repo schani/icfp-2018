@@ -7,59 +7,70 @@
 
 /* calcs the number of grounded voxels */
 int 
-calc_num_grounded(GArray * coords){
+calc_num_grounded(matrix_t * m_grounded, matrix_t * phases, matrix_t * blobs, int n_blob, int n_phase, int y){
     int num_grounded = 0;
-    int i;
-    for (i=0; i<coords->len; i++) {
-        extd_coord_t coord = (extd_coord_t)g_array_index(coords, extd_coord_t, i);
-        if (coord.grounded == Grounded){
-            num_grounded += 1;
+    resolution_t res = m_grounded->resolution;
+
+    int x, z;
+    for (int x = 0; x < res; x++) {
+        for (int z = 0; z < res; z++) {
+            coord_t c = create_coord(x, y, z);
+            if (get_voxel(phases, c) == n_phase && get_voxel(blobs, c) == n_blob) {
+                if (get_voxel(m_grounded, c) == Grounded){
+                    num_grounded += 1;
+                }
+            }
         }
     }
     return num_grounded;
 }
 
-
-static inline
-grounded_type_t get_grounded(matrix_t * m, coord_t c){
-    return get_voxel( m, c);
+/* checks if given voxed is active in current phase */
+static inline bool
+is_voxel_active(coord_t v, matrix_t * phases, matrix_t * blobs, int n_blob, int n_phase){
+    return (get_voxel(phases, v) == n_phase && get_voxel(blobs, v) == n_blob);
 }
 
 
+GArray * 
+get_frontier(matrix_t * m_grounded, matrix_t * phases, matrix_t * blobs, int n_blob, int n_phase, int y){
+    GArray *frontier = g_array_new(FALSE, FALSE, sizeof(coord_t));
+    resolution_t res = m_grounded->resolution;
 
+    int x, z, i;
 
-
-GArray * get_frontier(matrix_t * m_grounded, GArray * coords){
-    GArray *frontier = g_array_new(FALSE, FALSE, sizeof(extd_coord_t));
-    int i, j;
-    /* iterate over area voxels */
-    for (i=0; i<coords->len; i++) {
-        extd_coord_t coord = (extd_coord_t)g_array_index(coords, extd_coord_t, i);
-        /* check for not directly grounded voxels */
-        if (coord.grounded == TransitiveGrounded){
-            GArray *  neighbors = get_planar_neighbor_voxels(m_grounded, coord.c);
-            /* iterate over neighbors */
-            for (j=0; j<neighbors->len; j++) {
-                coord_t ncoord = (coord_t)g_array_index(neighbors, coord_t, j);
-                if(get_grounded(m_grounded, ncoord) == Grounded){
-                    /* direct neighbor is grounded so current voxel is frontier */
-                    g_array_append_val(frontier, coord);
-                    break;
-                }
+    for (int x = 0; x < res; x++) {
+        for (int z = 0; z < res; z++) {
+            coord_t c = create_coord(x, y, z);
+            if (is_voxel_active(c, phases, blobs, n_blob, n_phase)){
+                if (get_voxel(m_grounded, c) == TransitiveGrounded){
+                    GArray *  neighbors = get_planar_neighbor_voxels(m_grounded, c);
+                    /* iterate over neighbors */
+                    for (i=0; i<neighbors->len; i++) {
+                        coord_t ncoord = (coord_t)g_array_index(neighbors, coord_t, i);
+                        if(get_voxel(m_grounded, ncoord) == Grounded){
+                            /* direct neighbor is grounded so current voxel is frontier */
+                            g_array_append_val(frontier, c);
+                            break;
+                        }
+                    }
+                    g_array_free(neighbors, TRUE);
+                }             
             }
-            g_array_free(neighbors, TRUE);
         }
     }
 }
 
+/* more interesting potential function taking into consideration the number of grounded voxels
+   plus the frontier to the transitive grounded voxels */
 int 
-calc_potential_grounded_plus_frontier(matrix_t * m_grounded, GArray * coords){
+calc_potential_grounded_plus_frontier(matrix_t * m_grounded, matrix_t * phases, matrix_t * blobs, int n_blob, int n_phase, int y){
     int pot = 0;
 
     /* add grounded elements */
-    pot += calc_num_grounded(coords);
+    pot += calc_num_grounded(m_grounded, phases, blobs, n_blob, n_phase, y);
     /* add size of the frontier */
-    GArray * frontier = get_frontier(m_grounded, coords);
+    GArray * frontier = get_frontier(m_grounded, phases, blobs, n_blob, n_phase, y);
     pot += frontier->len;
 
     g_array_free(frontier, TRUE);
@@ -68,19 +79,36 @@ calc_potential_grounded_plus_frontier(matrix_t * m_grounded, GArray * coords){
 }
 
 
+
+
 /* calculates the potential of a area only by the number of voxels*/
 int 
-calc_potential_simple(GArray *coords){
-    return coords->len;
+calc_potential_simple(matrix_t * m_grounded, matrix_t * phases, matrix_t * blobs, int n_blob, int n_phase, int y){
+
+    resolution_t res = m_grounded->resolution;
+    int num_grounded=0;
+    int x, z;
+
+    for (int x = 0; x < res; x++) {
+        for (int z = 0; z < res; z++) {
+            coord_t c = create_coord(x, y, z);
+            if (is_voxel_active(c, phases, blobs, n_blob, n_phase)){
+                if (get_voxel(m_grounded, c) == Grounded){
+                    num_grounded += 1;
+                }             
+            }
+        }
+    }
+
+
+    return num_grounded;
 }
 
 
 
+int calc_potential(matrix_t * m_grounded, matrix_t * phases, matrix_t * blobs, int n_blob, int n_phase, int y){
 
-
-int calc_potential(matrix_t * m_grounded, GArray * coords){
-
-    return calc_potential_grounded_plus_frontier(m_grounded, coords);
+    return calc_potential_grounded_plus_frontier(m_grounded, phases, blobs, n_blob, n_phase, y);
 }
 
 

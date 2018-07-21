@@ -13,6 +13,9 @@ typedef struct{
 
 } area_t;
 
-int calc_potential(matrix_t * m_grounded, GArray * coords);
+
+
+
+int calc_potential(matrix_t * m_grounded, matrix_t * phases, matrix_t * blobs, int n_blob, int n_phase, int y);
 
 #endif /* _POTENTIAL_H */
