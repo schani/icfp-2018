@@ -9,6 +9,8 @@ typedef enum{
     TransitiveGrounded
 } grounded_type_t;
 
+
+/* returns number of phases */
 int make_plan (matrix_t *model, matrix_t *phases, matrix_t *blobs);
 
 void make_grounded (matrix_t *phases, matrix_t* grounded);
