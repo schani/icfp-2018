@@ -105,7 +105,7 @@ calc_potential_simple(matrix_t * m_grounded, matrix_t * phases, matrix_t * blobs
 }
 
 
-
+/* wrapper to provide the official potential function */
 int calc_potential(matrix_t * m_grounded, matrix_t * phases, matrix_t * blobs, int n_blob, int n_phase, int y){
 
     return calc_potential_grounded_plus_frontier(m_grounded, phases, blobs, n_blob, n_phase, y);
