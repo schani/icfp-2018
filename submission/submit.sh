@@ -18,7 +18,7 @@ rm -rf $DIR
 mkdir $DIR
 
 zip --password $ID $DIR/$FILE -j Traces/*
-SHA=$(shasum -a 256 $DIR/$FILE | awk '{ print $1 }')
+SHA=$(sha256sum $DIR/$FILE | awk '{ print $1 }')
 touch $DIR/$SHA
 
 ##### copy zipfile to server
