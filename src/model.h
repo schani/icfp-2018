@@ -53,4 +53,6 @@ matrix_t copy_matrix(matrix_t from);
 
 void free_matrix(matrix_t matrix);
 
+matrix_t read_model_file(char* filename);
+
 #endif /* _MODEL_H */
