@@ -119,11 +119,11 @@ GArray* exec_default_trace(matrix_t *mdl)
 		{
 			for (x = startPos.x; x <= maxFull.x; x++)
 			{
-				if(!is_coords_equal(curPos, create_coord(x, y, z))){
-					goto_next_pos(&curPos, create_coord(x, y, z), cmds);
-				}
-				if (get_voxel(mdl, create_coord(curPos.x, curPos.y-1, curPos.z)) == Full)
+				if (get_voxel(mdl, create_coord(x, y-1, z)) == Full)
 				{
+					if(!is_coords_equal(curPos, create_coord(x, y, z))){
+						goto_next_pos(&curPos, create_coord(x, y, z), cmds);
+					}
 					add_cmd(cmds, fill_cmd(create_coord(0, -1, 0)));
 				}
 			}
