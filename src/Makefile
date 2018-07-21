@@ -16,12 +16,14 @@ NONMAIN_OBJS = $(filter-out $(MAIN_OBJS), $(OBJS))
 DEPS = $(OBJS:.o=.d)
 FIXEDDEPS = $(DEPS:.d=.df)
 
+SED = ./sed.sh
+
 all: $(MAINS)
 
 $(MAINS): $(NONMAIN_OBJS)
 
 %.df: %.d
-	sed -r 's#/usr/[^[:space:]]+##g' < $< > $@
+	$(SED) -r 's#/usr/[^[:space:]]+##g' < $< > $@
 
 -include $(FIXEDDEPS)
 
