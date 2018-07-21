@@ -1,3 +1,5 @@
+# Add all targets (files with main fun ) to MAINS, even if unimportant!
+
 CPPFLAGS = -MD
 CC = gcc
 CFLAGS = -Werror -O2 -std=c99 -g \
