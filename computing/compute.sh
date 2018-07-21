@@ -90,7 +90,10 @@ function run() {
     local dir="$1" bin="$2" arglistfile="$3" resultdir="$4"
     local RUNDIR="$TMPDIR/RUN" RESULTDIR="$TMPDIR/RESULT"
 
-    [ -a "$resultdir" ] && fatal "run: resultdir already exists: $resultdir"
+    [ -a "$resultdir" ] && {
+	log "run: aborting cause resultdir already exists: $resultdir"
+	bb_quit 1
+    }
 
     local runid=$(basename "$TMPDIR")
 
