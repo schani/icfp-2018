@@ -94,6 +94,23 @@ int xyztond(int dx, int dy, int dz, int *nd)
 }
 
 static inline
+int xyztofd(int dx, int dy, int dz, int *fd)
+{
+	if ((dx < -30) || (dx > 30))
+	    return -1;
+	if ((dy < -30) || (dy > 30))
+	    return -1;
+	if ((dz < -30) || (dz > 30))
+	    return -1;
+
+	fd[0] = dx + 30;
+	fd[1] = dy + 30;
+	fd[2] = dz + 30;
+
+	return 0;
+}
+
+static inline
 int aitolld(int a, int i, int *dx, int *dy, int *dz)
 {
 	if (i > 30)		// -15 ... 15
@@ -142,5 +159,16 @@ int ndtoxyz(int nd, int *dx, int *dy, int *dz)
 
 	return 0;
 }
+
+static inline
+int fdtoxyz(int *fd, int *dx, int *dy, int *dz)
+{
+	*dx = fd[0] - 30;
+	*dy = fd[1] - 30;
+	*dz = fd[2] - 30;
+
+	return 0;
+}
+
 
 #endif /* _NBTIO_H */

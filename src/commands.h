@@ -13,9 +13,12 @@ typedef enum {
     SMove,
     LMove,
     Fission,
-    Fill,
     FusionP,
-    FusionS
+    FusionS,
+    Fill,
+    Void,
+    GFill,
+    GVoid,
 } command_type_t;
 
 
@@ -33,10 +36,17 @@ typedef struct {
 
 #define Fission_nd coord1
 
-#define Fill_nd coord1
-
 #define FusionP_nd coord1
 #define FusionS_nd coord1
+
+#define Fill_nd coord1
+#define Void_nd coord1
+
+#define GFill_nd coord1
+#define GFill_fd coord2
+
+#define GVoid_nd coord1
+#define GVoid_fd coord2
 
 
 void print_cmd (command_t cmd);
