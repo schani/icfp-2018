@@ -50,6 +50,7 @@ GArray * get_frontier(matrix_t * m_grounded, GArray * coords){
             g_array_free(neighbors, TRUE);
         }
     }
+    assert(false);
 }
 
 int 

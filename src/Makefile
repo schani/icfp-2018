@@ -23,12 +23,12 @@ all: $(MAINS)
 $(MAINS): $(NONMAIN_OBJS)
 
 %.df: %.d
-	$(SED) -r 's#/usr/[^[:space:]]+##g' < $< > $@
+	$(SED) --regexp-extended 's#/usr/[^[:space:]]+##g' < $< > $@
 
 -include $(FIXEDDEPS)
 
 clean:
-	rm -f *~ *.o *.d *.df $(MAINS)
+	rm -rf *~ *.o *.d *.df *.dSYM $(MAINS)
 
 .PHONY: all clean
 
