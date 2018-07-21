@@ -68,7 +68,7 @@ matrix_t copy_matrix(matrix_t from);
 
 bool are_matrixes_equal(matrix_t a, matrix_t b);
 
-void free_matrix(matrix_t matrix);
+void free_matrix(matrix_t *matrix);
 
 matrix_t read_model_file(char* filename);
 

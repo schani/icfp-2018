@@ -29,6 +29,7 @@ typedef struct {
 } state_t;
 
 state_t make_state (energy_t energy, harmonics_t harmonics, matrix_t matrix);
+state_t make_start_state (resolution_t res);
 
 bot_t make_bot (bid_t bid, coord_t pos, int n_seeds, bid_t *seeds);
 

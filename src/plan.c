@@ -61,8 +61,16 @@ plan_fills_model (matrix_t *plan, matrix_t *model) {
     return true;
 }
 
+bool
+is_grounded (matrix_t *model, coord_t c, int direction) {
+    resolution_t res = model->resolution;
+    xyz_t y = c.y;
+    return y == 0 || (y - direction < res && get_voxel(model, add_y(c, -direction)) != 0) || has_filled_neighbors(model, c);
+}
+
 void
 make_plan (matrix_t *model, matrix_t *phases, matrix_t *blobs) {
+    region_t full_region = matrix_region(model);
     resolution_t res = model->resolution;
     *phases = make_matrix(res);
     *blobs = make_matrix(res);
@@ -75,25 +83,20 @@ make_plan (matrix_t *model, matrix_t *phases, matrix_t *blobs) {
         int end = direction > 0 ? res : -1;
         for (int y = start; y != end; y += direction) {
             int num_blobs = 0;
-            for (int x = 0; x < res; x++) {
-                for (int z = 0; z < res; z++) {
-                    coord_t c = create_coord(x, y, z);
-                    if (y == 0 || (y - direction < res && get_voxel(phases, add_y(c, -direction))) != 0 || has_filled_neighbors(phases, c)) {
-                        if (can_fill(phases, model, c)) {
-                            num_blobs++;
-                            fill(phases, blobs, model, c, phase, num_blobs);
-                            did_fill = true;
-                        }
-                    }
+            FOR_EACH_COORD_XZ(c, y, full_region) {
+                if (is_grounded(phases, c, direction) && can_fill(phases, model, c)) {
+                    num_blobs++;
+                    fill(phases, blobs, model, c, phase, num_blobs);
+                    did_fill = true;
                 }
-            }
+            } END_FOR_EACH_COORD_XZ;
             if (num_blobs > 0) {
-                printf("%d fills at y=%d in phase %d\n", num_blobs, y, phase);
+                fprintf(stderr, "%d fills at y=%d in phase %d\n", num_blobs, y, phase);
             }
         }
         if (!did_fill) {
             assert(plan_fills_model(phases, model));
-            printf("%d phases\n", (phase-1));
+            fprintf(stderr, "%d phases\n", phase - 1);
             return;
         }
 
