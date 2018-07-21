@@ -1,3 +1,5 @@
+#ifndef _NBTIO_H
+#define	_NBTIO_H
 
 #include "trace.h"
 
@@ -141,4 +143,4 @@ int ndtoxyz(int nd, int *dx, int *dy, int *dz)
 	return 0;
 }
 
-
+#endif /* _NBTIO_H */

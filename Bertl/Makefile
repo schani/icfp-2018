@@ -16,6 +16,9 @@ nbtio_test : nbtio.o nbtio_test.o
 %.o : %.c
 	$(CC) $(CFLAGS) -c $<
 
+%.nbt : %.txt
+	./ascii2nbt >$@ <$<
+
 clean :
 	rm -f *~ *.o 
 	rm -f $(TARGETS)
