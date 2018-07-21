@@ -1,3 +1,3 @@
 #include "model.h"
 
-matrix_t make_plan (matrix_t *model);
+void make_plan (matrix_t *model, matrix_t *phases, matrix_t *blobs);

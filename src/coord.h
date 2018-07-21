@@ -13,24 +13,25 @@ typedef struct {
     xyz_t x, y, z;
 } coord_t;
 
-static inline coord_t
-add_coords (coord_t c1, coord_t c2) {
-    coord_t c;
-    c.x = c1.x + c2.x;
-    c.y = c1.y + c2.y;
-    c.z = c1.z + c2.z;
-    return c;
-}
-
-// FIXME: rename to make_coord and make public
+// FIXME: rename to make_coord
 static inline coord_t 
-create_coord(int16_t x, int16_t y, int16_t z)
+create_coord(xyz_t x, xyz_t y, xyz_t z)
 {
 	coord_t c;
 	c.x = x;
 	c.y = y;
 	c.z = z;
 	return c;
+}
+
+static inline coord_t
+add_coords (coord_t c1, coord_t c2) {
+    return create_coord(c1.x + c2.x, c1.y + c2.y, c1.z + c2.z);
+}
+
+static inline coord_t
+sub_coords (coord_t c1, coord_t c2) {
+    return create_coord(c1.x - c2.x, c1.y - c2.y, c1.z - c2.z);
 }
 
 static inline coord_t
@@ -71,6 +72,11 @@ is_lcd(coord_t c){
 static inline int 
 get_mlen(coord_t c){
     return (abs(c.x) + abs(c.y) + abs(c.z));
+}
+
+static inline int
+get_mdist(coord_t c1, coord_t c2) {
+    return get_mlen(sub_coords(c1, c2));
 }
 
 /* returns Chessboard length of a difference */
