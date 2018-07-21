@@ -2,13 +2,7 @@
 #define _AREA_H
 
 #include "coord.h"
-
-
-typedef enum{  
-    Free = 0,
-    Grounded,
-    TransitiveGrounded
-} grounded_type_t;
+#include "plan.h"
 
 
 
