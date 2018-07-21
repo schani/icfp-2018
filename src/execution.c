@@ -57,17 +57,39 @@ compare_bots (const void *p1, const void *p2) {
     return compare_bids(&b1->bid, &b2->bid);
 }
 
+execution_t
+start_timestep (state_t state) {
+    energy_t res = state.matrix.resolution;
+    execution_t exec;
+
+    // FIXME: This is highly inefficient
+    exec.vol = make_matrix(res);
+    exec.new_bots = g_array_new(FALSE, FALSE, sizeof(bot_t));
+
+    exec.new_state = make_state(state.energy, state.harmonics, state.matrix);
+
+    exec.new_state.energy += timestep_energy(&state);
+    exec.new_state.energy += bot_energy(&state);
+
+    return exec;
+}
+
+state_t
+finish_timestep (execution_t exec) {
+    free_matrix(exec.vol);
+
+    g_array_sort(exec.new_bots, compare_bots);
+
+    exec.new_state.n_bots = exec.new_bots->len;
+    exec.new_state.bots = (bot_t*)g_array_free(exec.new_bots, FALSE);
+
+    return exec.new_state;
+
+}
+
 static state_t
 exec_timestep (state_t state, command_t *commands) {
-    energy_t res = state.matrix.resolution;
-    // FIXME: This is highly inefficient
-    matrix_t vol = make_matrix(res);
-    GArray *new_bots = g_array_new(FALSE, FALSE, sizeof(bot_t));
-
-    state_t new_state = make_state(state.energy, state.harmonics, state.matrix);
-
-    new_state.energy += timestep_energy(&state);
-    new_state.energy += bot_energy(&state);
+    execution_t exec = start_timestep(state);
 
     for (int i = 0; i < state.n_bots; i++) {
         bot_t bot = state.bots[i];
@@ -79,25 +101,25 @@ exec_timestep (state_t state, command_t *commands) {
             assert(c.x == 0 && c.y == 0 && c.z == 0);
             assert(state.n_bots == 1);
             assert(state.harmonics == Low);
-            set_volatile(&vol, c);
+            set_volatile(&exec.vol, c);
             break;
 
         case Wait:
-            set_volatile(&vol, c);
-            g_array_append_val(new_bots, bot);
+            set_volatile(&exec.vol, c);
+            g_array_append_val(exec.new_bots, bot);
             break;
 
         case Flip:
-            if (new_state.harmonics == High) {
-                new_state.harmonics = Low;
-            } else if (new_state.harmonics == Low) {
-                new_state.harmonics = High;
+            if (exec.new_state.harmonics == High) {
+                exec.new_state.harmonics = Low;
+            } else if (exec.new_state.harmonics == Low) {
+                exec.new_state.harmonics = High;
             } else {
                 assert(false);
             }
 
-            set_volatile(&vol, c);
-            g_array_append_val(new_bots, bot);
+            set_volatile(&exec.vol, c);
+            g_array_append_val(exec.new_bots, bot);
             break;
 
         case SMove: {
@@ -106,11 +128,11 @@ exec_timestep (state_t state, command_t *commands) {
             assert(is_coord_valid(&state.matrix, cp));
             region_t r = make_region(c, cp);
             assert(region_is_empty(&state.matrix, r));
-            set_volatile_region(&vol, r);
+            set_volatile_region(&exec.vol, r);
             bot.pos = cp;
-            g_array_append_val(new_bots, bot);
+            g_array_append_val(exec.new_bots, bot);
 
-            new_state.energy += smove_energy(lld);
+            exec.new_state.energy += smove_energy(lld);
             break;
         }
 
@@ -125,13 +147,13 @@ exec_timestep (state_t state, command_t *commands) {
             assert(is_coord_valid(&state.matrix, cp));
             assert(is_coord_valid(&state.matrix, cpp));
             assert(region_is_empty(&state.matrix, r1));
-            set_volatile_region(&vol, r1);
+            set_volatile_region(&exec.vol, r1);
             assert(region_is_empty(&state.matrix, r2));
-            set_volatile_region(&vol, r2);
+            set_volatile_region(&exec.vol, r2);
             bot.pos = cpp;
-            g_array_append_val(new_bots, bot);
+            g_array_append_val(exec.new_bots, bot);
 
-            new_state.energy += lmove_energy(sld1, sld2);
+            exec.new_state.energy += lmove_energy(sld1, sld2);
             break;
         }
 
@@ -139,42 +161,42 @@ exec_timestep (state_t state, command_t *commands) {
             assert(bot.n_seeds > 0);
             coord_t cp = add_coords(c, cmd->Fission_nd);
 
-            set_volatile(&vol, c);
+            set_volatile(&exec.vol, c);
             assert(is_coord_valid(&state.matrix, cp));
-            set_volatile(&vol, cp);
+            set_volatile(&exec.vol, cp);
             assert(get_voxel(&state.matrix, cp) == Empty);
 
             uint8_t m = cmd->m;
             bot_t botp = make_bot(bot.seeds[0], cp, m, bot.seeds + 1);
             bot = make_bot(bot.bid, bot.pos, bot.n_seeds - 1 - m, bot.seeds + 1 + m);
 
-            g_array_append_val(new_bots, bot);
-            g_array_append_val(new_bots, botp);
+            g_array_append_val(exec.new_bots, bot);
+            g_array_append_val(exec.new_bots, botp);
 
-            new_state.energy += fission_energy();
+            exec.new_state.energy += fission_energy();
             break;
         }
 
         case Fill: {
             coord_t cp = add_coords(c, cmd->Fill_nd);
 
-            set_volatile(&vol, c);
+            set_volatile(&exec.vol, c);
             assert(is_coord_valid(&state.matrix, cp));
-            set_volatile(&vol, cp);
+            set_volatile(&exec.vol, cp);
 
             voxel_t v = get_voxel(&state.matrix, cp);
             set_voxel(&state.matrix, cp, Full);
-            new_state.energy += fill_energy(v == Empty);
+            exec.new_state.energy += fill_energy(v == Empty);
 
-            g_array_append_val(new_bots, bot);
+            g_array_append_val(exec.new_bots, bot);
             break;
         }
 
         case FusionP: {
             coord_t cp = add_coords(c, cmd->FusionP_nd);
-            set_volatile(&vol, c);
+            set_volatile(&exec.vol, c);
             assert(is_coord_valid(&state.matrix, cp));
-            set_volatile(&vol, cp);
+            set_volatile(&exec.vol, cp);
             int j = find_fusion(&state, commands, FusionS, cp);
             bot_t bot_s = state.bots[j];
             bot_t new_bot = make_bot(bot.bid, bot.pos, bot.n_seeds + 1 + bot_s.n_seeds, NULL);
@@ -182,9 +204,9 @@ exec_timestep (state_t state, command_t *commands) {
             new_bot.seeds[bot.n_seeds] = bot_s.bid;
             memcpy(new_bot.seeds + bot.n_seeds + 1, bot_s.seeds, sizeof(bid_t) * bot_s.n_seeds);
             qsort(new_bot.seeds, new_bot.n_seeds, sizeof(bid_t), compare_bids);
-            g_array_append_val(new_bots, new_bot);
+            g_array_append_val(exec.new_bots, new_bot);
 
-            new_state.energy -= fusion_energy();
+            exec.new_state.energy -= fusion_energy();
             break;
         }
 
@@ -200,14 +222,7 @@ exec_timestep (state_t state, command_t *commands) {
         }
     }
 
-    free_matrix(vol);
-
-    g_array_sort(new_bots, compare_bots);
-
-    new_state.n_bots = new_bots->len;
-    new_state.bots = (bot_t*)g_array_free(new_bots, FALSE);
-
-    return new_state;
+    return finish_timestep(exec);
 }
 
 matrix_t
@@ -234,6 +249,6 @@ exec_trace (trace_t trace, resolution_t resolution) {
     }
 
     printf("energy used: %lld\n", state.energy);
-    
+
     return state.matrix;
 }
