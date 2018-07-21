@@ -4,6 +4,9 @@ check:
 demo:
 	./compute.sh run demo ./add.sh demo/120args result
 
+failtest:
+	./compute.sh run failtest ./do.sh failtest/tofailornottofail result
+
 key-add:
 	echo THIS WILL ADD ALL HOST KEYS TO YOUR ~/.ssh/known_hosts FILE
 	echo press ENTER to continue, ctl-c to abort
@@ -13,4 +16,4 @@ key-add:
 clean:
 	rm -rf *~ build result
 
-.PHONY: clean demo key-add
+.PHONY: clean demo key-add failtest
