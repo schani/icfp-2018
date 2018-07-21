@@ -52,7 +52,33 @@ region_is_empty (matrix_t *m, region_t r) {
     return true;
 }
 
-#include <stdio.h>
+
+GArray * 
+get_planar_neighbor_voxels(matrix_t *m, coord_t c){
+    GArray *neighbors = g_array_new(FALSE, FALSE, sizeof(coord_t));
+    coord_t pot_neighbor;
+
+    pot_neighbor = create_coord(c.x - 1, c.y, c.z );
+    if(is_coord_valid (m, pot_neighbor)){
+        g_array_append_val(neighbors, pot_neighbor);
+    }
+    pot_neighbor = create_coord(c.x + 1, c.y, c.z );
+    if(is_coord_valid (m, pot_neighbor)){
+        g_array_append_val(neighbors, pot_neighbor);
+    }
+    pot_neighbor = create_coord(c.x, c.y, c.z - 1);
+    if(is_coord_valid (m, pot_neighbor)){
+        g_array_append_val(neighbors, pot_neighbor);
+    }
+    pot_neighbor = create_coord(c.x, c.y, c.z + 1);
+    if(is_coord_valid (m, pot_neighbor)){
+        g_array_append_val(neighbors, pot_neighbor);
+    }
+    return neighbors;
+}
+
+
+
 
 matrix_t
 read_model_file(char* filename) {

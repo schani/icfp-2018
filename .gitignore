@@ -2,6 +2,7 @@ dfltTracesL
 problemsL
 *~
 *.d
+*.df
 *.o
 src/_test
 src/run_trace

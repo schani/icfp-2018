@@ -51,6 +51,9 @@ matrix_region (matrix_t *m) {
     return make_region(create_coord(0, 0, 0), create_coord(res-1, res-1, res-1));
 }
 
+GArray * 
+get_planar_neighbor_voxels(matrix_t *m, coord_t c);
+
 bool region_is_empty (matrix_t *m, region_t r);
 
 matrix_t make_matrix(resolution_t resolution);
