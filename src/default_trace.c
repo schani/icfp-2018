@@ -117,6 +117,8 @@ GArray* exec_default_trace(matrix_t *mdl)
 	{
 		for (z = startPos.z; z <= maxFull.z; z++)
 		{
+			region_t next_row = make_region(create_coord(startPos.x, y-1, z), create_coord(maxFull.x, y-1, z));
+			if (region_is_empty(mdl, next_row)) continue;
 			for (x = startPos.x; x <= maxFull.x; x++)
 			{
 				if (get_voxel(mdl, create_coord(x, y-1, z)) == Full)
