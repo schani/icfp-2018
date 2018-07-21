@@ -6,3 +6,7 @@ problemsL
 src/_test
 core.*
 generate_default_trace
+submission/Traces/*
+Bertl/ascii2nbt
+Bertl/nbt2ascii
+submission/submission_???????
