@@ -37,21 +37,21 @@ int lldtoai(int dx, int dy, int dz, int *a, int *i)
 	if (dx && (dy == 0) && (dz == 0)) {
 	    *a = 1;
 
-	    if ((dx > -15) && (dx < 15))
+	    if ((dx >= -15) && (dx <= 15))
 		*i = dx + 15;
 	    else
 		return -2;
 	} else if (dy && (dx == 0) && (dz == 0)) {
 	    *a = 2;
 
-	    if ((dy > -15) && (dy < 15))
+	    if ((dy >= -15) && (dy <= 15))
 		*i = dy + 15;
 	    else
 		return -2;
 	} else if (dz && (dx == 0) && (dy == 0)) {
 	    *a = 3;
 
-	    if ((dz > -15) && (dz < 15))
+	    if ((dz >= -15) && (dz <= 15))
 		*i = dz + 15;
 	    else
 		return -2;
@@ -66,21 +66,21 @@ int sldtoai(int dx, int dy, int dz, int *a, int *i)
 	if (dx && (dy == 0) && (dz == 0)) {
 	    *a = 1;
 
-	    if ((dx > -5) && (dx < 5))
+	    if ((dx >= -5) && (dx <= 5))
 		*i = dx + 5;
 	    else
 		return -2;
 	} else if (dy && (dx == 0) && (dz == 0)) {
 	    *a = 2;
 
-	    if ((dy > -5) && (dy < 5))
+	    if ((dy >= -5) && (dy <= 5))
 		*i = dy + 5;
 	    else
 		return -2;
 	} else if (dz && (dx == 0) && (dy == 0)) {
 	    *a = 3;
 
-	    if ((dz > -5) && (dz < 5))
+	    if ((dz >= -5) && (dz <= 5))
 		*i = dz + 5;
 	    else
 		return -2;
