@@ -140,6 +140,7 @@ int	route_bot(matrix_t *m, coord_t *pos, coord_t *end, command_t *cmd)
 	int dx = end->x - pos->x;	
 	int dy = end->y - pos->y;	
 	int dz = end->z - pos->z;	
+	int partial = 0;
 
 	// printf("\nroute <%d,%d,%d> -> <%d,%d,%d> = [%d,%d,%d]\n",
 	//     pos->x, pos->y, pos->z,
@@ -191,6 +192,8 @@ int	route_bot(matrix_t *m, coord_t *pos, coord_t *end, command_t *cmd)
 	    c1 = abs(dy);
 	    type = Move_SMove;
 
+	    partial = 1;
+	
 	    // printf("3d move -> smove (dy)\n");
 	}
 
@@ -216,6 +219,9 @@ int	route_bot(matrix_t *m, coord_t *pos, coord_t *end, command_t *cmd)
 
 		*end = stop;
 	    }
+	
+	    if ((r == SUCCESS) && partial)
+		return ERR_PARTIAL;
 	    return r;
 
 	} else if (type == Move_LMove) {
