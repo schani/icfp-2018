@@ -13,12 +13,12 @@ typedef enum {
     SMove,
     LMove,
     Fission,
-    Fill,
-    Void,
     FusionP,
     FusionS,
+    Fill,
+    Void,
     GFill,
-    GVoid
+    GVoid,
 } command_type_t;
 #define COMMAND_MAX GVoid
 
@@ -36,6 +36,7 @@ typedef struct {
 #define LMove_sld2 coord2
 
 #define Fission_nd coord1
+
 
 #define Fill_nd coord1
 #define Void_nd coord1

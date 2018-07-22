@@ -146,6 +146,82 @@ int read_nbt_command(FILE *f, command_t *cmd)
 	    cmd->Fill_nd.y = dy;
 	    cmd->Fill_nd.z = dz;
 	}
+	else if ((c & 0x7) == 0x2) {	// Void
+	    int nd = c >> 3;
+
+	    int dx = 0, dy = 0, dz = 0;
+	    int r = ndtoxyz(nd, &dx, &dy, &dz);
+	    
+	    if (r)
+		return ERR_RANGE;	
+
+	    cmd->type = Void;
+	    cmd->Void_nd.x = dx;
+	    cmd->Void_nd.y = dy;
+	    cmd->Void_nd.z = dz;
+	}
+	else if ((c & 0x7) == 0x1) {	// GFill
+	    int nd = c >> 3;
+
+	    int dx = 0, dy = 0, dz = 0;
+	    int r = ndtoxyz(nd, &dx, &dy, &dz);
+	    
+	    if (r)
+		return ERR_RANGE;	
+
+	    int fd[3] = {0};
+	    for (int i=0; i<3; i++) {
+		fd[i] = fgetc(f);
+
+		if (fd[i] == EOF)
+		    return ERR_SHORT;
+	    }
+
+	    int fx = 0, fy = 0, fz = 0;
+	    r = fdtoxyz(fd, &fx, &fy, &fz);
+	    
+	    if (r)
+		return ERR_RANGE;
+
+	    cmd->type = GFill;
+	    cmd->GFill_nd.x = dx;
+	    cmd->GFill_nd.y = dy;
+	    cmd->GFill_nd.z = dz;
+	    cmd->GFill_fd.x = fx;
+	    cmd->GFill_fd.y = fy;
+	    cmd->GFill_fd.z = fz;
+	}
+	else if ((c & 0x7) == 0x0) {	// GVoid
+	    int nd = c >> 3;
+
+	    int dx = 0, dy = 0, dz = 0;
+	    int r = ndtoxyz(nd, &dx, &dy, &dz);
+	    
+	    if (r)
+		return ERR_RANGE;	
+
+	    int fd[3] = {0};
+	    for (int i=0; i<3; i++) {
+		fd[i] = fgetc(f);
+
+		if (fd[i] == EOF)
+		    return ERR_SHORT;
+	    }
+
+	    int fx = 0, fy = 0, fz = 0;
+	    r = fdtoxyz(fd, &fx, &fy, &fz);
+	    
+	    if (r)
+		return ERR_RANGE;
+
+	    cmd->type = GVoid;
+	    cmd->GVoid_nd.x = dx;
+	    cmd->GVoid_nd.y = dy;
+	    cmd->GVoid_nd.z = dz;
+	    cmd->GVoid_fd.x = fx;
+	    cmd->GVoid_fd.y = fy;
+	    cmd->GVoid_fd.z = fz;
+	}
 	else {				// Unknown
 	    return ERR_BAD;
 	}
@@ -235,6 +311,48 @@ int write_nbt_command(FILE *f, command_t *cmd)
 		return ERR_RANGE;
     
 	    putc(0x03 | (nd << 3), f);
+	    break; }
+
+	case Void: {
+	    int nd = 0;
+	    int r = xyztond(cmd->Void_nd.x, cmd->Void_nd.y, cmd->Void_nd.z, &nd);
+
+	    if (r)
+		return ERR_RANGE;
+    
+	    putc(0x02 | (nd << 3), f);
+	    break; }
+
+	case GFill: {
+	    int nd = 0;
+	    int r = xyztond(cmd->GFill_nd.x, cmd->GFill_nd.y, cmd->GFill_nd.z, &nd);
+
+	    if (r)
+		return ERR_RANGE;
+
+	    int fd[3] = {0};
+	    r = xyztofd(cmd->GFill_fd.x, cmd->GFill_fd.y, cmd->GFill_fd.z, fd);
+    
+	    putc(0x01 | (nd << 3), f);
+	    putc(fd[0], f);
+	    putc(fd[1], f);
+	    putc(fd[2], f);
+	    break; }
+
+	case GVoid: {
+	    int nd = 0;
+	    int r = xyztond(cmd->GVoid_nd.x, cmd->GVoid_nd.y, cmd->GVoid_nd.z, &nd);
+
+	    if (r)
+		return ERR_RANGE;
+
+	    int fd[3] = {0};
+	    r = xyztofd(cmd->GVoid_fd.x, cmd->GVoid_fd.y, cmd->GVoid_fd.z, fd);
+    
+	    putc(0x00 | (nd << 3), f);
+	    putc(fd[0], f);
+	    putc(fd[1], f);
+	    putc(fd[2], f);
 	    break; }
 
 	default:

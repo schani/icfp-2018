@@ -11,6 +11,7 @@ enum {
 	SUCCESS = 0,
 	ERR_SHORT = 1,
 	ERR_HIT,
+	ERR_PARTIAL,
 	ERR_LOST,
 } result_t;
 
