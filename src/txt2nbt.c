@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 	char cmd[CMD_MAX];
 
 	int c = 0;
-	unsigned line = 0;
+	unsigned line = 1;
 	unsigned col = 0;
 
 	do {
