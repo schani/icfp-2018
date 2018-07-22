@@ -161,7 +161,22 @@ wait_cmd()
     return cmd;
 }
 
+static inline command_t
+fusionp_cmd(coord_t nd)
+{
+    command_t cmd;
+    cmd.type = FusionP;
+    cmd.FusionP_nd = nd;
+    return cmd;
+}
 
+static inline command_t
+fusions_cmd(coord_t nd) 
+{
+    command_t cmd;
+    cmd.type = FusionS;
+    cmd.FusionS_nd = nd;    
+}
 
 static inline void
 add_cmd(GArray *cmds, command_t cmd)

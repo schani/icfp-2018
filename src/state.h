@@ -33,4 +33,7 @@ state_t make_start_state (resolution_t res);
 
 bot_t make_bot (bid_t bid, coord_t pos, int n_seeds, bid_t *seeds);
 
+int compare_bids (const void *p1, const void *p2);
+int compare_bots (const void *p1, const void *p2);
+
 #endif /* _STATE_H */
