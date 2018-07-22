@@ -12,6 +12,12 @@ typedef struct {
     GArray* cmds; 
 } bot_commands_t;
 
+typedef struct {
+    int n_bots;
+    bot_commands_t* bot_commands; 
+} multi_bot_commands_t;
+
+multi_bot_commands_t make_multi_bot_commands(int n_bots);
 
 bot_commands_t make_bot_commands(bot_t bot);
 // returns the new bot
@@ -28,9 +34,7 @@ void set_bot_pos(bot_commands_t* bc, coord_t coord) {
     bc->bot.pos = coord;
 }
 
-
-
 // returns the command trace of all bots together 
-GArray* merge_bot_commands(bot_commands_t* cmds, int n_bots);
+GArray* merge_bot_commands(multi_bot_commands_t mbc);
 
 #endif  // __MULTI_BOT_HELPERS_H
