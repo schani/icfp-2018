@@ -1,6 +1,10 @@
 #include "default_trace.h"
+
+#include "move_helper.h"
+
 #include <stdio.h>
 #include <stdlib.h>
+
 
 void calc_boundary_box(matrix_t *mdl, coord_t *minFull, coord_t *maxFull)
 {
@@ -44,58 +48,7 @@ void calc_boundary_box(matrix_t *mdl, coord_t *minFull, coord_t *maxFull)
 	END_FOR_EACH_COORD;
 }
 
-void goto_next_pos(coord_t *curPos, coord_t nextPos, GArray *cmds)
-{
-	coord_t tmp;
-	coord_t lld;
 
-	// y movement must be done at 1st !
-	if((nextPos.y - curPos->y) != 0){
-		while ((nextPos.y - curPos->y > 15) || (nextPos.y - curPos->y < -15))
-		{
-			if(nextPos.y - curPos->y > 15)
-				lld = create_coord(0, 15, 0);
-			else
-				lld = create_coord(0, -15, 0);
-			add_cmd(cmds, smove_cmd(lld));
-			*curPos = add_coords(*curPos, lld);
-		}
-		lld = create_coord(0, (nextPos.y - curPos->y), 0);
-		add_cmd(cmds, smove_cmd(lld));
-		*curPos = add_coords(*curPos, lld);
-	}
-
-
-	if((nextPos.x - curPos->x) != 0){
-		while ((nextPos.x - curPos->x > 15) || (nextPos.x - curPos->x < -15))
-		{
-			if(nextPos.x - curPos->x > 15)
-				lld = create_coord(15, 0, 0);
-			else
-				lld = create_coord(-15, 0, 0);
-			add_cmd(cmds, smove_cmd(lld));
-			*curPos = add_coords(*curPos, lld);
-		}
-		lld = create_coord((nextPos.x - curPos->x), 0, 0);
-		add_cmd(cmds, smove_cmd(lld));
-		*curPos = add_coords(*curPos, lld);
-	}
-
-	if ((nextPos.z - curPos->z) != 0){
-		while ((nextPos.z - curPos->z > 15) || (nextPos.z - curPos->z < -15))
-		{
-			if(nextPos.z - curPos->z > 15)
-				lld = create_coord(0, 0, 15);
-			else
-				lld = create_coord(0, 0, -15);
-			add_cmd(cmds, smove_cmd(lld));
-			*curPos = add_coords(*curPos, lld);
-		}
-		lld = create_coord(0, 0, (nextPos.z - curPos->z));
-		add_cmd(cmds, smove_cmd(lld));
-		*curPos = add_coords(*curPos, lld);
-	}
-}
 
 GArray* exec_default_trace(matrix_t *mdl)
 {
