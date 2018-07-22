@@ -77,7 +77,9 @@ typedef struct{
 
 
 
-/* assumes the 4 bots are sitting on the top of the bb */
+/* assumes the 4 bots are sitting on the top of the bb 
+   b1 over c_min. b2, b3, b4 oriented clockwise
+*/
 
 /* visualization of the state
 
@@ -94,9 +96,28 @@ y
 |
 |
 +----------------------------------------> x(,z)
-     
-     
+
+z
+^
+|                  bb max
+|       +-----------+
+|       |b2       b3|
+|       |           |  orientation of bots is
+|       |           |  clockwise starting with
+|       |           |  b1 over c_min coord of
+|       |b1       b4|  the boundary box
+|       +-----------+
+|      bb min
+|
++------------------------------------------> x
+
+
 */
+
+
+void goto_rel_pos(coord_t v, GArray *cmds){
+    /* FIXME: implement somewhere else */
+}
 
 cmd4
 void_a_boundary_box(matrix_t *mdl, region_t* bb){
@@ -113,8 +134,27 @@ void_a_boundary_box(matrix_t *mdl, region_t* bb){
     ret_val.b3_cmds = b3_cmds;
     ret_val.b4_cmds = b4_cmds;
 
-    int16_t cur_y;
+    xyz_t cur_bot_y = bb->c_max.y+1;
 
+	for (xyz_t y = bb->c_max.y+1; y > bb->c_min.y; y++)
+	{
+    	region_t next_row = make_region(create_coord(bb->c_min.x, y-1, bb->c_min.z), create_coord(bb->c_max.x, y-1, bb->c_max.z));
+		if (region_is_empty(mdl, next_row)) continue;
+
+        /* move bot down */
+		goto_rel_pos(create_coord(0, y-cur_bot_y, 0), b1_cmds);
+		goto_rel_pos(create_coord(0, y-cur_bot_y, 0), b2_cmds);
+		goto_rel_pos(create_coord(0, y-cur_bot_y, 0), b3_cmds);
+		goto_rel_pos(create_coord(0, y-cur_bot_y, 0), b4_cmds);
+        cur_bot_y = y;
+
+        /* void the region below */
+		add_cmd(b1_cmds, gvoid_cmd(create_coord(0, -1, 0), create_coord(bb->c_max.x, 0, bb->c_max.z)));
+		add_cmd(b2_cmds, gvoid_cmd(create_coord(0, -1, 0), create_coord(bb->c_max.x, 0, bb->c_min.z)));
+		add_cmd(b3_cmds, gvoid_cmd(create_coord(0, -1, 0), create_coord(bb->c_min.x, 0, bb->c_min.z)));
+		add_cmd(b2_cmds, gvoid_cmd(create_coord(0, -1, 0), create_coord(bb->c_min.x, 0, bb->c_max.z)));
+        
+	}
     return ret_val;
 
 }
