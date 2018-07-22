@@ -2,13 +2,35 @@
 #define __MULTI_BOT_HELPERS_H
 
 #include "coord.h"
+#include "state.h"
 
-typedef struct {} bot_commands_t;
+#include <gmodule.h>
 
-coord_t get_bot_pos(bot_commands_t* bc);
-void set_bot_pos(bot_commands_t* bc, coord_t coord);
+// contains invalid commands, do not execute without running through merge_bot_commands
+typedef struct {
+    bot_t bot;
+    GArray* cmds; 
+} bot_commands_t;
 
-bot_commands_t fission(bot_commands_t* bc);
+
+bot_commands_t make_bot_commands(bot_t bot);
+// returns the new bot
+// FIXME add m parameter later if needed.
+bot_commands_t fission(bot_commands_t* bc, coord_t rel_pos);
 void fusion(bot_commands_t* bc_primary, bot_commands_t* bc_secondary);
+
+static inline coord_t 
+get_bot_pos(bot_commands_t* bc) { return bc->bot.pos; }
+
+// FIXME: replace future usages of this by using execution.c code to modify the position. 
+static inline
+void set_bot_pos(bot_commands_t* bc, coord_t coord) {
+    bc->bot.pos = coord;
+}
+
+
+
+// returns the command trace of all bots together 
+GArray* merge_bot_commands(bot_commands_t* cmds, int n_bots);
 
 #endif  // __MULTI_BOT_HELPERS_H
