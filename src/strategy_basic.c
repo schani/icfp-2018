@@ -379,7 +379,7 @@ move_b5b6b7b8_to_pos_and_fuse(matrix_t *mdl, bc8_t bot_commands, coord_t b5_targ
 
 
 void
-move_b3b4_to_pos_and_fuse(matrix_t *mdl, bc4_t bot_commands, coord_t b3_target, coord_t b4_target, coord_t spawn_vect){
+move_b3b4_to_pos_and_fuse(matrix_t *mdl, bc8_t bot_commands, coord_t b3_target, coord_t b4_target){
 
     int wait_time;
     /* move bot 3 and bot 4 to correct position and keep bot 1 and bot 2 waiting */
@@ -408,7 +408,7 @@ move_b3b4_to_pos_and_fuse(matrix_t *mdl, bc4_t bot_commands, coord_t b3_target, 
 
 
 void
-move_b2_to_pos_and_fuse(matrix_t *mdl, bc2_t bot_commands, coord_t b2_target, coord_t spawn_vect){
+move_b2_to_pos_and_fuse(matrix_t *mdl, bc8_t bot_commands, coord_t b2_target){
     
 
     /* move bot 2 to correct position and keep bot 1 waiting */
@@ -427,18 +427,39 @@ move_b2_to_pos_and_fuse(matrix_t *mdl, bc2_t bot_commands, coord_t b2_target, co
 
 
 GArray* 
-exec_flush_at_once(matrix_t *mdl){
-	GArray *cmds = g_array_new(FALSE, FALSE, sizeof(command_t));
-    /* spawn new bot one x coord ahead */
-    //spawn_at_pos(cmds, create_coord(1,0,0), 3);
-
-    /* move new robot to end and spawn in z direction new robots */
-    //cmd2 phase1_commands = move_b2_to_pos_and_duplicate_bots(mdl, create_coord(0,0,0), create_coord(1,0,0), create_coord(mdl->resolution-1,0,0),create_coord(0,0,1),2);
+exec_flush_at_once(matrix_t *mdl, bot_t bot1){
 
 
+    bot_commands_t bot1_commands = make_bot_commands(bot1);
+
+    bc2_t exec_2bots = initial_spawn(mdl, &bot1_commands, create_coord(1,0,0));
+    bc4_t exec_4bots = move_b2_to_pos_and_duplicate(mdl, exec_2bots, create_coord(mdl->resolution-1,0,0), create_coord(0,0,1));
+    bc8_t exec_8bots = move_b3b4_to_pos_and_duplicate(mdl, exec_4bots, 
+    create_coord(0,0,mdl->resolution-1), create_coord(mdl->resolution-1,0,mdl->resolution-1), create_coord(0,1,0));
+
+    move_b5b6b7b8_to_pos_and_void(mdl, exec_8bots, 
+        create_coord(0,mdl->resolution-1,0),    
+        create_coord(mdl->resolution-1,mdl->resolution-1,0),
+        create_coord(0,mdl->resolution-1,mdl->resolution-1),
+        create_coord(mdl->resolution-1,mdl->resolution-1,mdl->resolution-1));
+
+    move_b5b6b7b8_to_pos_and_fuse(mdl, exec_8bots,
+            create_coord(0,1,0),    
+            create_coord(mdl->resolution-1,1,0),
+            create_coord(0,1,mdl->resolution-1),
+            create_coord(mdl->resolution-1,1,mdl->resolution-1));
+
+    move_b3b4_to_pos_and_fuse(mdl, exec_8bots,
+            create_coord(0,0,1), 
+            create_coord(mdl->resolution-1,0,1));
+
+    move_b2_to_pos_and_fuse(mdl, exec_8bots, 
+            create_coord(1,0,0));
+
+	add_cmd(bot1_commands.cmds, halt_cmd());
 
 
-
+    /* FIXME : call the exec merger  */
 
 
 
