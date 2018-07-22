@@ -46,18 +46,20 @@ make_bot (bid_t bid, coord_t pos, int n_seeds, bid_t *seeds) {
 }
 
 state_t
-make_start_state (resolution_t res) {
+make_lightning_start_state (resolution_t res) {
+    return make_start_state_from_matrix(make_matrix(res), Lightning);
+}
 
-    /* FIXME : make changeable?!? */
-    #define MAX_SEEDS 39
-
-    state_t state = make_state(0, Low, make_matrix(res));
-    bid_t *seeds = malloc(sizeof(bid_t) * MAX_SEEDS);
-    for (int i = 0; i < MAX_SEEDS; i++) {
+state_t make_start_state_from_matrix(matrix_t matrix, task_mode_t mode)
+{
+    int n_bots = (mode == Lightning) ? 20 : 40;
+    state_t state = make_state(0, Low, matrix);
+    bid_t *seeds = malloc(sizeof(bid_t) * (n_bots-1));
+    for (int i = 0; i < n_bots-1; i++) {
         seeds[i] = i + 2;
     }
     state.n_bots = 1;
     state.bots = malloc(sizeof(bot_t) * 1);
-    state.bots[0] = make_bot(1, create_coord(0, 0, 0), MAX_SEEDS, seeds);
+    state.bots[0] = make_bot(1, create_coord(0, 0, 0), n_bots-1, seeds);
     return state;
 }

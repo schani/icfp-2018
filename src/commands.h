@@ -7,7 +7,7 @@
 
 
 typedef enum {
-    Halt,
+    Halt = 0,
     Wait,
     Flip,
     SMove,

@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <string.h>
+#include <math.h>
 
 #include <gmodule.h>
 
@@ -33,6 +34,42 @@ find_fusion (state_t *state, command_t *commands, command_type_t type, coord_t c
         return i;
     }
     assert(false);
+}
+
+static int
+region_dimension(region_t r) {
+    int dim = 0;
+    dim += (r.c_min.x == r.c_max.x) ? 1 : 0;
+    dim += (r.c_min.x == r.c_max.x) ? 1 : 0;
+    dim += (r.c_min.x == r.c_max.x) ? 1 : 0;
+    return dim;
+}
+
+static region_t
+make_group_command_region(coord_t bot_pos, command_t cmd) {
+    assert(cmd.type == GVoid || cmd.type == GFill);
+    assert(&cmd.GVoid_nd == &cmd.GVoid_nd);
+    assert(&cmd.GVoid_fd == &cmd.GVoid_fd);
+
+    coord_t near_corner = add_coords(bot_pos, cmd.GVoid_nd);
+    coord_t far_corner = add_coords(near_corner, cmd.GVoid_fd);
+    return make_region(near_corner, far_corner);
+}
+
+void
+check_group_bots(state_t *state, command_t *commands, command_type_t type, region_t r) {
+    int bots_in_group_command = 0;
+    for (int i = 0; i < state->n_bots; i++) {
+        if (commands[i].type != type) continue;
+        region_t rp = make_group_command_region(state->bots[i].pos, commands[i]);
+        if (!region_equal(&r, &rp)) {
+            continue;            
+        }
+        bots_in_group_command++;
+    }
+    int dim = region_dimension(r);
+    int expected_len = powl(2, dim);
+    assert(bots_in_group_command == expected_len);
 }
 
 execution_t
@@ -169,6 +206,21 @@ exec_bot (execution_t *exec, bot_t bot, command_t cmd) {
         break;
     }
 
+    case Void: {
+        coord_t cp = add_coords(c, cmd.Void_nd);
+
+        set_volatile(&exec->vol, c);
+        assert(is_coord_valid(&exec->state.matrix, cp));
+        set_volatile(&exec->vol, cp);
+
+        voxel_t v = get_voxel(&exec->state.matrix, cp);
+        set_voxel(&exec->state.matrix, cp, Empty);
+        exec->new_state.energy += void_energy(v == Full);
+
+        g_array_append_val(exec->new_bots, bot);
+        break;
+    }
+
     case FusionP: {
         coord_t cp = add_coords(c, cmd.FusionP_nd);
         set_volatile(&exec->vol, c);
@@ -194,6 +246,44 @@ exec_bot (execution_t *exec, bot_t bot, command_t cmd) {
         break;
     }
 
+    case GVoid: {
+        set_volatile(&exec->vol, c);
+        
+        coord_t near_corner = add_coords(c, cmd.GVoid_nd);
+        coord_t far_corner = add_coords(near_corner, cmd.GVoid_fd);
+        region_t r = make_region(near_corner, far_corner);
+        if (is_coords_equal(near_corner, r.c_min)) {
+            check_group_bots(&exec->state, exec->commands, GVoid, r);
+            FOR_EACH_COORD(cp, r) {
+                set_volatile(&exec->vol, cp);
+                voxel_t v = get_voxel(&exec->state.matrix, cp);
+                set_voxel(&exec->state.matrix, cp, Empty);
+                exec->new_state.energy += void_energy(v == Full);
+             } END_FOR_EACH_COORD;
+        } 
+        g_array_append_val(exec->new_bots, bot);
+        break;
+    }
+
+    case GFill: {
+        set_volatile(&exec->vol, c);
+        
+        coord_t near_corner = add_coords(c, cmd.GVoid_nd);
+        coord_t far_corner = add_coords(near_corner, cmd.GVoid_fd);
+        region_t r = make_region(near_corner, far_corner);
+        if (is_coords_equal(near_corner, r.c_min)) {
+            check_group_bots(&exec->state, exec->commands, GVoid, r);
+            FOR_EACH_COORD(cp, r) {
+                set_volatile(&exec->vol, cp);
+                voxel_t v = get_voxel(&exec->state.matrix, cp);
+                set_voxel(&exec->state.matrix, cp, Full);
+                exec->new_state.energy += fill_energy(v == Full);
+             } END_FOR_EACH_COORD;
+        } 
+        g_array_append_val(exec->new_bots, bot);
+        break;
+    }
+
     default:
         assert(false);
     }
@@ -212,8 +302,7 @@ exec_timestep (state_t state, command_t *commands) {
 }
 
 matrix_t
-exec_trace (trace_t trace, resolution_t resolution) {
-    state_t state = make_start_state(resolution);
+exec_trace_with_state(trace_t trace, state_t state) {
     int cmd_index = 0;
 
     while (state.n_bots > 0) {
@@ -230,3 +319,15 @@ exec_trace (trace_t trace, resolution_t resolution) {
 
     return state.matrix;
 }
+
+matrix_t
+exec_lightning_trace (trace_t trace, resolution_t resolution) {
+    state_t state = make_lightning_start_state(resolution);
+    return exec_trace_with_state(trace, state);
+}
+
+matrix_t exec_trace(trace_t trace, matrix_t src_model, task_mode_t mode) {
+    state_t state = make_start_state_from_matrix(src_model, mode);
+    return exec_trace_with_state(trace, state);
+}
+

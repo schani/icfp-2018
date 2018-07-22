@@ -7,6 +7,11 @@
 typedef uint8_t bid_t;
 
 typedef enum {
+    Lightning, 
+    Thunderbolt, // because Full is taken
+} task_mode_t;
+
+typedef enum {
     Low,
     High
 } harmonics_t;
@@ -29,7 +34,8 @@ typedef struct {
 } state_t;
 
 state_t make_state (energy_t energy, harmonics_t harmonics, matrix_t matrix);
-state_t make_start_state (resolution_t res);
+state_t make_lightning_start_state (resolution_t res);
+state_t make_start_state_from_matrix(matrix_t matrix, task_mode_t mode);
 
 bot_t make_bot (bid_t bid, coord_t pos, int n_seeds, bid_t *seeds);
 

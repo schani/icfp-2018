@@ -14,7 +14,7 @@ state_t finish_timestep (execution_t *exec);
 
 state_t exec_timestep (state_t state, command_t *commands);
 
-matrix_t exec_trace (trace_t trace, resolution_t resolution);
+matrix_t exec_trace(trace_t trace, matrix_t src_model, task_mode_t mode);
 
 static inline energy_t
 timestep_energy (state_t *state) {
@@ -47,6 +47,11 @@ lmove_energy (coord_t sld1, coord_t sld2) {
 static inline energy_t
 fill_energy (bool was_empty) {
     return was_empty ? 12 : 6;
+}
+
+static inline energy_t
+void_energy (bool was_full) {
+    return was_full ? -12 : 3;
 }
 
 static inline energy_t
