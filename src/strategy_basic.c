@@ -21,9 +21,14 @@ calc_boundary_box_in_region(matrix_t *mdl, region_t r, region_t* bb){
         return num_filled;
     }
 
-    /* initialize max and min - normalize min and max of the region to accept all kind of regions*/
+    /* initialize max and min - normalize min and max of the region to accept all kind of regions
+    //not needed region shall always be wellformed!
     coord_t minFull = create_coord(MAX(r.c_max.x, r.c_min.x), MAX(r.c_max.y, r.c_min.y), MAX(r.c_max.y, r.c_min.y));
     coord_t maxFull = create_coord(MIN(r.c_max.x, r.c_min.x), MIN(r.c_max.y, r.c_min.y), MIN(r.c_max.y, r.c_min.y));
+    */
+
+    coord_t minFull = r.c_max;
+    coord_t maxFull = r.c_min;
 
     /* iterate through voxels. update min and max, count number of full voxels */
 	FOR_EACH_COORD(cur, r)
@@ -63,6 +68,56 @@ calc_boundary_box_in_region(matrix_t *mdl, region_t r, region_t* bb){
 }
 
 
+typedef struct{
+    GArray * b1_cmds;
+    GArray * b2_cmds;
+    GArray * b3_cmds;
+    GArray * b4_cmds;
+} cmd4;
+
+
+
+/* assumes the 4 bots are sitting on the top of the bb */
+
+/* visualization of the state
+
+y
+^
+|     
+|     b           b <- bots
+|     +-----------+ <- upper end of bb
+|     |x          |
+|     |x (zeug)  x|
+|     |xxxxxxxxxxx|
+|     |x          |
+|     +-----------+ <- lower end of bb
+|
+|
++----------------------------------------> x(,z)
+     
+     
+*/
+
+cmd4
+void_a_boundary_box(matrix_t *mdl, region_t* bb){
+
+    cmd4 ret_val;
+
+	GArray *b1_cmds = g_array_new(FALSE, FALSE, sizeof(command_t));
+	GArray *b2_cmds = g_array_new(FALSE, FALSE, sizeof(command_t));
+	GArray *b3_cmds = g_array_new(FALSE, FALSE, sizeof(command_t));
+	GArray *b4_cmds = g_array_new(FALSE, FALSE, sizeof(command_t));
+
+    ret_val.b1_cmds = b1_cmds;
+    ret_val.b2_cmds = b2_cmds;
+    ret_val.b3_cmds = b3_cmds;
+    ret_val.b4_cmds = b4_cmds;
+
+    int16_t cur_y;
+
+    return ret_val;
+
+}
 
 
 
