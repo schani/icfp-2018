@@ -97,7 +97,7 @@ make_plan (matrix_t *model, matrix_t *phases, matrix_t *blobs) {
         if (!did_fill) {
             assert(plan_fills_model(phases, model));
             fprintf(stderr, "%d phases\n", phase - 1);
-            return phase -1;
+            return phase - 1;
         }
 
         phase++;

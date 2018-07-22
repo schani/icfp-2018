@@ -25,17 +25,11 @@ set_volatile_region (matrix_t *m, region_t r) {
     } END_FOR_EACH_COORD;
 }
 
-// FIXME: make public
-static bool
-coords_equal (coord_t c1, coord_t c2) {
-    return c1.x == c2.x && c1.y == c2.y && c1.z == c2.z;
-}
-
 static int
 find_fusion (state_t *state, command_t *commands, command_type_t type, coord_t c) {
     for (int i = 0; i < state->n_bots; i++) {
         if (commands[i].type != type) continue;
-        if (!coords_equal(state->bots[i].pos, c)) continue;
+        if (!is_coords_equal(state->bots[i].pos, c)) continue;
         return i;
     }
     assert(false);
@@ -129,6 +123,8 @@ exec_bot (execution_t *exec, bot_t bot, command_t cmd) {
         assert(is_coord_valid(&exec->state.matrix, cpp));
         assert(region_is_empty(&exec->state.matrix, r1));
         set_volatile_region(&exec->vol, r1);
+        // cp is set by both regions, so we unset it here
+        set_voxel(&exec->vol, cp, NonVolatile);
         assert(region_is_empty(&exec->state.matrix, r2));
         set_volatile_region(&exec->vol, r2);
         bot.pos = cpp;
