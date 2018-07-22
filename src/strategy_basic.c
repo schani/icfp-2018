@@ -147,11 +147,83 @@ void_a_boundary_box(matrix_t *mdl, region_t* bb, multi_bot_commands_t *mbc){
 
 
 
+int
+move_bot_in_multibot_setting(bot_commands_t *bc, coord_t rel_movement){
+
+    int steps =	goto_rel_pos(rel_movement, bc->cmds);
+    set_bot_pos(bc, add_coords(get_bot_pos(bc), rel_movement));
+    return steps;
+}
+
+void
+move_up_and_to_next_bb_xdirection(matrix_t *mdl, region_t* bb, multi_bot_commands_t *mbc){
+    
+    xyz_t cur_bot_y = get_bot_pos(&mbc->bot_commands[0]).y;
+    xyz_t next_bot_y = bb->c_max.y+1;
+
+    /* move up again */
+    move_bot_in_multibot_setting(&mbc->bot_commands[0], create_coord(0, next_bot_y-cur_bot_y, 0));
+    move_bot_in_multibot_setting(&mbc->bot_commands[1], create_coord(0, next_bot_y-cur_bot_y, 0));
+    move_bot_in_multibot_setting(&mbc->bot_commands[2], create_coord(0, next_bot_y-cur_bot_y, 0));
+    move_bot_in_multibot_setting(&mbc->bot_commands[3], create_coord(0, next_bot_y-cur_bot_y, 0));
+
+    /* move along X axis (front is in positive direction) */
+    //for bots [1, 2]
+    xyz_t xdiff_front = bb->c_max.x - mbc->bot_commands[1].bot.pos.x;
+    coord_t xmove_front = create_coord(xdiff_front, 0, 0);
+    //for bots [0, 3]
+    xyz_t xdiff_back = bb->c_min.x - mbc->bot_commands[0].bot.pos.x;
+    coord_t xmove_back = create_coord(xdiff_back, 0, 0);
+
+    move_bot_in_multibot_setting(&mbc->bot_commands[0], xmove_back);
+    move_bot_in_multibot_setting(&mbc->bot_commands[1], xmove_front);
+    move_bot_in_multibot_setting(&mbc->bot_commands[2], xmove_front);
+    move_bot_in_multibot_setting(&mbc->bot_commands[3], xmove_back);
+}
+
+
+
+void
+move_up_and_to_next_bb_zdirection(matrix_t *mdl, region_t* bb, multi_bot_commands_t *mbc){
+    
+    xyz_t cur_bot_y = get_bot_pos(&mbc->bot_commands[0]).y;
+    xyz_t next_bot_y = bb->c_max.y+1;
+
+    /* move up again */
+    move_bot_in_multibot_setting(&mbc->bot_commands[0], create_coord(0, next_bot_y-cur_bot_y, 0));
+    move_bot_in_multibot_setting(&mbc->bot_commands[1], create_coord(0, next_bot_y-cur_bot_y, 0));
+    move_bot_in_multibot_setting(&mbc->bot_commands[2], create_coord(0, next_bot_y-cur_bot_y, 0));
+    move_bot_in_multibot_setting(&mbc->bot_commands[3], create_coord(0, next_bot_y-cur_bot_y, 0));
+
+    /* move along Z axis (front is in positive direction) */
+    //for bots [2, 3]
+    xyz_t zdiff_front = bb->c_max.z - mbc->bot_commands[2].bot.pos.z;
+    coord_t zmove_front = create_coord(0,0, zdiff_front);
+    //for bots [0, 1]
+    xyz_t zdiff_back = bb->c_min.z - mbc->bot_commands[0].bot.pos.z;
+    coord_t zmove_back = create_coord(0,0, zdiff_back);
+
+    move_bot_in_multibot_setting(&mbc->bot_commands[0], zmove_back);
+    move_bot_in_multibot_setting(&mbc->bot_commands[1], zmove_front);
+    move_bot_in_multibot_setting(&mbc->bot_commands[2], zmove_front);
+    move_bot_in_multibot_setting(&mbc->bot_commands[3], zmove_back);
+}
+
+
+void
+bot_spawn(matrix_t *mdl, multi_bot_commands_t *mbc, int mbc_id_src, int mbc_id_trg, coord_t spawn_vect){
+    /* spawn the new bot */
+    mbc->bot_commands[1] = fission(&mbc->bot_commands[0], spawn_vect);
+}
+
+
+
 GArray* 
 exec_test_bb_flush(matrix_t *mdl, bot_t *bot1){
 
 
-    
+
+
 
 }
 

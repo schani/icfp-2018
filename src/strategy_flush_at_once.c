@@ -21,7 +21,7 @@ void wait_n_rounds(GArray *cmds, int n){
 
 
 
-void
+static void
 initial_spawn(matrix_t *mdl, multi_bot_commands_t *mbc, coord_t spawn_vect){
     /* spawn the new bot */
     mbc->bot_commands[1] = fission(&mbc->bot_commands[0], spawn_vect);
