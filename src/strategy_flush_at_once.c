@@ -120,17 +120,17 @@ move_b5b6b7b8_to_pos_and_void(matrix_t *mdl, multi_bot_commands_t *mbc, coord_t 
     wait_n_rounds(mbc->bot_commands[3].cmds, wait_time);
 
     /* void the region surrounded */
-    add_cmd(mbc->bot_commands[0].cmds, gvoid_cmd(create_coord( 1, 0,  1), create_coord(  mdl->resolution-2,   mdl->resolution,   mdl->resolution-2)));
-    add_cmd(mbc->bot_commands[7].cmds, gvoid_cmd(create_coord(-1, 0, -1), create_coord(-(mdl->resolution-2), -mdl->resolution, -(mdl->resolution-2))));
+    add_cmd(mbc->bot_commands[0].cmds, gvoid_cmd(create_coord( 1, 0,  1), create_coord(  mdl->resolution-3,   mdl->resolution-1,   mdl->resolution-3)));
+    add_cmd(mbc->bot_commands[7].cmds, gvoid_cmd(create_coord(-1, 0, -1), create_coord(-(mdl->resolution-3), -mdl->resolution+1, -(mdl->resolution-3))));
 
-    add_cmd(mbc->bot_commands[1].cmds, gvoid_cmd(create_coord(-1, 0,  1), create_coord(-(mdl->resolution-2),  mdl->resolution,   mdl->resolution-2)));
-    add_cmd(mbc->bot_commands[6].cmds, gvoid_cmd(create_coord( 1, 0, -1), create_coord(  mdl->resolution-2,  -mdl->resolution, -(mdl->resolution-2))));
+    add_cmd(mbc->bot_commands[1].cmds, gvoid_cmd(create_coord(-1, 0,  1), create_coord(-(mdl->resolution-3),  mdl->resolution-1,   mdl->resolution-3)));
+    add_cmd(mbc->bot_commands[6].cmds, gvoid_cmd(create_coord( 1, 0, -1), create_coord(  mdl->resolution-3,  -mdl->resolution+1, -(mdl->resolution-3))));
 
-    add_cmd(mbc->bot_commands[2].cmds, gvoid_cmd(create_coord( 1, 0, -1), create_coord(  mdl->resolution-2,   mdl->resolution, -(mdl->resolution-2))));
-    add_cmd(mbc->bot_commands[5].cmds, gvoid_cmd(create_coord(-1, 0,  1), create_coord(-(mdl->resolution-2), -mdl->resolution,   mdl->resolution-2)));
+    add_cmd(mbc->bot_commands[2].cmds, gvoid_cmd(create_coord( 1, 0, -1), create_coord(  mdl->resolution-3,   mdl->resolution-1, -(mdl->resolution-3))));
+    add_cmd(mbc->bot_commands[5].cmds, gvoid_cmd(create_coord(-1, 0,  1), create_coord(-(mdl->resolution-3), -mdl->resolution+1,   mdl->resolution-3)));
 
-    add_cmd(mbc->bot_commands[3].cmds, gvoid_cmd(create_coord(-1, 0, -1), create_coord(-(mdl->resolution-2),  mdl->resolution, -(mdl->resolution-2))));
-    add_cmd(mbc->bot_commands[4].cmds, gvoid_cmd(create_coord( 1, 0,  1), create_coord(  mdl->resolution-2,  -mdl->resolution,   mdl->resolution-2)));
+    add_cmd(mbc->bot_commands[3].cmds, gvoid_cmd(create_coord(-1, 0, -1), create_coord(-(mdl->resolution-3),  mdl->resolution-1, -(mdl->resolution-3))));
+    add_cmd(mbc->bot_commands[4].cmds, gvoid_cmd(create_coord( 1, 0,  1), create_coord(  mdl->resolution-3,  -mdl->resolution+1,   mdl->resolution-3)));
 
 /*
     for(int i=0; i<mbc->n_bots; ++i){
