@@ -3,6 +3,7 @@
 #include "plan.h"
 #include "execution.h"
 #include "default_trace.h"
+#include "move_helper.h"
 
 
 bool
