@@ -93,7 +93,7 @@ internal_merge_bot_commands(multi_bot_commands_t mbc, GArray* cmds, int cmd_offs
             if (curr->type >= 0 && curr->type <= COMMAND_MAX) {
                 add_cmd(cmds, *curr);
                 //printf("%d %d:", i, mbc.bot_commands[i].bot.bid);
-                print_cmd(*curr);
+                //print_cmd(*curr);
                 if(curr->type == FusionS) {
                     mbc = remove_bot(i, mbc);
                     i--;
@@ -107,7 +107,7 @@ internal_merge_bot_commands(multi_bot_commands_t mbc, GArray* cmds, int cmd_offs
     }
     add_cmd(cmds, *mbc_get_command(mbc, 0, cmd_offset));
 
-    print_cmd(*mbc_get_command(mbc, 0, cmd_offset));
+    // print_cmd(*mbc_get_command(mbc, 0, cmd_offset));
 
     //printf("==== </merge> =====\n");
 }
