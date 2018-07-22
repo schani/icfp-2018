@@ -28,7 +28,7 @@ $(MAINS): $(NONMAIN_OBJS)
 -include $(FIXEDDEPS)
 
 clean:
-	rm -f *~ *.o *.d *.df $(MAINS)
+	rm -rf *~ *.o *.d *.df *.dSYM $(MAINS)
 
 .PHONY: all clean
 

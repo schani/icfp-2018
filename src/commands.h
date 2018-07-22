@@ -14,8 +14,11 @@ typedef enum {
     LMove,
     Fission,
     Fill,
+    Void,
     FusionP,
-    FusionS
+    FusionS,
+    GFill,
+    GVoid
 } command_type_t;
 
 
@@ -34,9 +37,16 @@ typedef struct {
 #define Fission_nd coord1
 
 #define Fill_nd coord1
+#define Void_nd coord1
 
 #define FusionP_nd coord1
 #define FusionS_nd coord1
+
+#define GFill_nd coord1
+#define GFill_fd coord2
+
+#define GVoid_nd coord1
+#define GVoid_fd coord2
 
 
 void print_cmd (command_t cmd);
@@ -58,6 +68,17 @@ fill_cmd(coord_t nd)
 	command_t cmd;
 	cmd.type = Fill;
 	cmd.Fill_nd = nd;
+	return cmd;
+}
+
+static inline command_t 
+void_cmd(coord_t nd)
+{
+    assert(is_nd(nd));
+
+	command_t cmd;
+	cmd.type = Void;
+	cmd.Void_nd = nd;
 	return cmd;
 }
 
@@ -98,6 +119,31 @@ fission_cmd(coord_t nd, int m)
     return cmd;
 }
 
+static inline command_t
+gfill_cmd(coord_t nd, coord_t fd)
+{
+    assert(is_nd(nd));
+    assert(is_fd(fd));
+
+	command_t cmd;
+    cmd.type = GFill;
+    cmd.GFill_nd = nd;
+    cmd.GFill_fd = fd;
+    return cmd;
+}
+
+static inline command_t
+gvoid_cmd(coord_t nd, coord_t fd)
+{
+    assert(is_nd(nd));
+    assert(is_fd(fd));
+
+	command_t cmd;
+    cmd.type = GVoid;
+    cmd.GFill_nd = nd;
+    cmd.GFill_fd = fd;
+    return cmd;
+}
 
 static inline command_t
 flip_cmd()

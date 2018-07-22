@@ -14,7 +14,7 @@ function main() {
     COMPUTEDIR="${PWD}/computing"
     BUILDSUBDIR="build"
     BUILDDIR="$COMPUTEDIR/$BUILDSUBDIR"
-    BINS=("src/generate_default_trace" "Bertl/ascii2nbt")
+    BINS=("src/generate_default_trace" "src/build" "src/run_trace" "Bertl/ascii2nbt")
     MODELS=(lightning_problems/*.mdl)
 
     [ -d "computing" ] || fatal "must be called outside of computing dir"
@@ -49,8 +49,33 @@ function main() {
     cat > "$BUILDDIR/run.sh" << EOF
 #!/bin/bash
 
+set -o pipefail
+
 mkdir -p result
-./generate_default_trace input-models/\$1 | ./ascii2nbt > result/\${1%_tgt.mdl}.nbt
+
+mkdir -p tmp
+SCORE=999999999999999999
+BEST=
+for bin in generate_default_trace build
+do
+  if ./\$bin input-models/\$1 | ./ascii2nbt > tmp/\$bin.nbt
+  then
+    if MAYBE=\$(./run_trace input-models/\$1 tmp/\$bin.nbt)
+    then
+      # looks valid
+      echo \$MAYBE > tmp/\$bin.energy
+      if (( MAYBE < SCORE ))
+      then
+        cp tmp/\$bin.nbt result/\${1%_tgt.mdl}.nbt
+        SCORE=\$MAYBE
+        BEST=\$bin
+      fi
+    fi
+  else
+    echo "\$bin failed" > tmp/\$bin.error
+  fi
+done
+echo "winner was \$BEST with energy \$SCORE"
 EOF
     chmod +x "$BUILDDIR/run.sh"
 

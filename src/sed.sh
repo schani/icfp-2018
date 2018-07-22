@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SEDLIST=(/usr/local/bin/gsed /bin/sed)
+SEDLIST=(/usr/local/bin/gsed /bin/sed /usr/bin/sed)
 
 for SED in "${SEDLIST[@]}"
 do

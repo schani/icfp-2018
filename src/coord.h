@@ -97,10 +97,18 @@ is_sld(coord_t c){
     return (is_lcd(c) && get_mlen(c) <= 5);
 }
 
-/* is near linear coordinate difference*/
+/* is near coordinate difference*/
 static inline bool
 is_nd(coord_t c){
     return (get_mlen(c) > 0 && get_mlen(c) <=2 && get_clen(c) == 1);
 }
+
+/* is far coordinate difference*/
+static inline bool
+is_fd(coord_t c){
+    return (get_clen(c) > 0 && get_clen(c) <=30);
+}
+
+
 
 #endif /* _COORD_H */
