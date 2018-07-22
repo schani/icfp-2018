@@ -313,7 +313,7 @@ main (int argc, char *argv[]) {
         return 1;
     }
 
-    state_t state = make_start_state(model.resolution);
+    state_t state = make_lightning_start_state(model.resolution);
 
     build_phase(&state, &phases, &blobs, 1);
 

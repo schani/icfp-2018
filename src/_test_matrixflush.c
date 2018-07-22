@@ -9,11 +9,13 @@
 
 int main(int argc, char** argv) {
 
-    /*
+  
     if (argc != 2) {
-        assert(false);
+        assert(argc == 2);
     }
     matrix_t m = read_model_file(argv[1]);
+
+    /* 
     int r = m.resolution - 1;
 
     coord_t origin = create_coord(0,0,0);
@@ -29,7 +31,7 @@ int main(int argc, char** argv) {
     assert(region_is_empty(&m, y_r));
 
     */
-    state_t start = make_start_state(25);
+    state_t start = make_start_state_from_matrix(m, Thunderbolt);
 
 
 

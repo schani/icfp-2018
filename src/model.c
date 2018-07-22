@@ -111,5 +111,6 @@ read_model_file(char* filename) {
             }
         }
     }
+    fprintf(stderr, "resolution %d read until %d %d %d", resolution, x, y, z);
     assert(false);
 }
