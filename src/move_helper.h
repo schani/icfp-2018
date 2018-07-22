@@ -5,7 +5,8 @@
 #include "coord.h"
 #include <gmodule.h>
 
-void goto_next_pos(coord_t *curPos, coord_t nextPos, GArray *cmds);
+int goto_next_pos(coord_t *curPos, coord_t nextPos, GArray *cmds);
+int goto_rel_pos(coord_t rel_pos, GArray *cmds);
 
 
 #endif  // __MOVE_HELPER_H
