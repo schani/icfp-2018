@@ -20,6 +20,7 @@ typedef enum {
     GFill,
     GVoid,
 } command_type_t;
+#define COMMAND_MAX GVoid
 
 
 typedef struct {
@@ -36,11 +37,12 @@ typedef struct {
 
 #define Fission_nd coord1
 
-#define FusionP_nd coord1
-#define FusionS_nd coord1
 
 #define Fill_nd coord1
 #define Void_nd coord1
+
+#define FusionP_nd coord1
+#define FusionS_nd coord1
 
 #define GFill_nd coord1
 #define GFill_fd coord2
@@ -68,6 +70,17 @@ fill_cmd(coord_t nd)
 	command_t cmd;
 	cmd.type = Fill;
 	cmd.Fill_nd = nd;
+	return cmd;
+}
+
+static inline command_t 
+void_cmd(coord_t nd)
+{
+    assert(is_nd(nd));
+
+	command_t cmd;
+	cmd.type = Void;
+	cmd.Void_nd = nd;
 	return cmd;
 }
 
@@ -108,6 +121,31 @@ fission_cmd(coord_t nd, int m)
     return cmd;
 }
 
+static inline command_t
+gfill_cmd(coord_t nd, coord_t fd)
+{
+    assert(is_nd(nd));
+    assert(is_fd(fd));
+
+	command_t cmd;
+    cmd.type = GFill;
+    cmd.GFill_nd = nd;
+    cmd.GFill_fd = fd;
+    return cmd;
+}
+
+static inline command_t
+gvoid_cmd(coord_t nd, coord_t fd)
+{
+    assert(is_nd(nd));
+    assert(is_fd(fd));
+
+	command_t cmd;
+    cmd.type = GVoid;
+    cmd.GVoid_nd = nd;
+    cmd.GVoid_fd = fd;
+    return cmd;
+}
 
 static inline command_t
 flip_cmd()
@@ -125,11 +163,29 @@ wait_cmd()
     return cmd;
 }
 
+static inline command_t
+fusionp_cmd(coord_t nd)
+{
+    command_t cmd;
+    cmd.type = FusionP;
+    cmd.FusionP_nd = nd;
+    return cmd;
+}
 
+static inline command_t
+fusions_cmd(coord_t nd) 
+{
+    command_t cmd;
+    cmd.type = FusionS;
+    cmd.FusionS_nd = nd;  
+    return cmd;  
+}
 
 static inline void
 add_cmd(GArray *cmds, command_t cmd)
 {
+	assert(cmd.type >= 0);
+    assert(cmd.type <= COMMAND_MAX);
 	g_array_append_val(cmds, cmd);
 }
 

@@ -4,6 +4,20 @@
 #include "execution.h"
 #include "default_trace.h"
 #include "route.h"
+#include "move_helper.h"
+
+
+bool
+contains_bot (state_t state, coord_t pos)
+{
+	for (int i = 0; i < state.n_bots; ++i)
+	{
+		if (is_coords_equal(pos, state.bots[i].pos))
+			return true;
+	}
+	return false;
+}
+
 
 // each element in starting_pos will be the starting pos for the respective bot
 void
@@ -250,6 +264,38 @@ build_phase (state_t *state, matrix_t *phases, matrix_t *blobs, int phase) {
             free_matrix(&grounded);
         }
     }
+}
+
+// needs some space around origin
+void
+duplicate_bots (state_t *state)
+{
+	// FIXME: not optimal, better to track seeds in code!
+	
+	goto_pos(state, create_coord(0,0,0));
+
+	// round 1
+        exec_cmd(state, fission_cmd(create_coord(1,0,0), 2));
+
+	// reporduction rounds 2..5
+	for (int i = 2; i < 5; ++i)
+	{
+		exec_cmd(state, fission_cmd(create_coord(1,0,0), 2));
+		for (int j = 2; j <= i; ++j)
+			goto_pos(state, create_coord(1,0,0));
+	}
+
+	// round 6
+	for (int j = 1; j <= 5; ++j)
+	{
+		exec_cmd(state, fission_cmd(create_coord(0,1,0), 1));
+	}
+
+	// round 7
+	for (int j = 1; j <= 10; ++j)
+	{
+		exec_cmd(state, fission_cmd(create_coord(0,0,1), 0));
+	}
 }
 
 int

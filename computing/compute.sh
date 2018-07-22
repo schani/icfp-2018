@@ -28,13 +28,17 @@ function do_ssh() {
 	    then
 		# probably a failure of ssh not on remote side
 		prefix="!ssh"
+		echo "$index_nr !ssh" >> "$TMPDIR/ERROR"
 	    else
 		prefix="e255"
-		touch "$TMPDIR/ERROR"
+		echo "$index_nr e255" >> "$TMPDIR/ERROR"
 	    fi
 	else
 	    printf -v prefix "e%3i" "$retval"
-	    touch "$TMPDIR/ERROR"
+	    if (( retval > 0 ))
+	    then
+		echo "$index_nr $prefix" >> "$TMPDIR/ERROR"
+	    fi
 	fi
     fi
 	
@@ -50,14 +54,12 @@ function do_ssh() {
 	echo -n " [STDERR] " >> "$TMPDIR/$index.$h"
 	tr '\n' ' ' < "$TMPDIR/$index.$h.stderr" | tr -d '\r' \
 	    >> "$TMPDIR/$index.$h"
-	touch "$TMPDIR/ERROR"
     fi
     if [ -s "$TMPDIR/$h.sshlog" ]
     then
 	echo -n " [SSH] " >> "$TMPDIR/$index.$h"
         tr '\n' ' ' < "$TMPDIR/$index.$h.sshlog" | tr -d '\r' >> \
 	    "$TMPDIR/$index.$h"
-	touch "$TMPDIR/ERROR"
     fi
     echo "" >> "$TMPDIR/$index.$h"
     [ -a "$TMPDIR/ERROR" ] || {
@@ -125,7 +127,7 @@ function run() {
 	local remotewd="$runid.$index"
 
 	echo "$line" > "$RESULTDIR/$index.args"
-	do_ssh "$index" "$node" "mkdir $remotewd && tar -C $remotewd -xzf - && cd $remotewd && \"$bin\" $line > STDOUT && cd ~ && tar -C $remotewd -czf - . && rm -rf $remotewd" < "$RUNDIR/wd.tar.gz" > "$RESULTDIR/$index-result.tar.gz" &
+	do_ssh "$index" "$node" "mkdir $remotewd && tar -C $remotewd -xzf - && cd $remotewd && \"$bin\" $line > STDOUT && cd ~ && tar -C $remotewd -cvzf - . && rm -rf $remotewd" < "$RUNDIR/wd.tar.gz" > "$RESULTDIR/$index-result.tar.gz" &
 	index=$((index + 1))
     done < "$RUNDIR/arglistfile"
     wait
@@ -223,7 +225,7 @@ function main() {
 	*) usage
     esac
 
-    rm -rf "$TMPDIR" || fatal "failed to remove TMPDIR: $TMPDIR"
+   rm -rf "$TMPDIR" || fatal "failed to remove TMPDIR: $TMPDIR"
 }
 
 main "$@"
