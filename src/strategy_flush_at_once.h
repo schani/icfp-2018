@@ -1,4 +1,5 @@
 
+#include <gmodule.h>
 
 
 GArray* 

@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <gmodule.h>
 #include "default_trace.h"
 
 #include "move_helper.h"
 #include "multi_bot_helpers.h"
+#include "strategy_flush_at_once.h"
 
 
 
@@ -132,11 +132,11 @@ move_b5b6b7b8_to_pos_and_void(matrix_t *mdl, multi_bot_commands_t *mbc, coord_t 
     add_cmd(mbc->bot_commands[3].cmds, gvoid_cmd(create_coord(-1, 0, -1), create_coord(-(mdl->resolution-2),  mdl->resolution, -(mdl->resolution-2))));
     add_cmd(mbc->bot_commands[4].cmds, gvoid_cmd(create_coord( 1, 0,  1), create_coord(  mdl->resolution-2,  -mdl->resolution,   mdl->resolution-2)));
 
-
+/*
     for(int i=0; i<mbc->n_bots; ++i){
         debugBotPos(&mbc->bot_commands[i].bot);
     }
-
+*/
 
 
 }
