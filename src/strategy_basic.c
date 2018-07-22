@@ -3,8 +3,9 @@
 #include <string.h>
 #include <gmodule.h>
 #include "default_trace.h"
-#include "execution.h"
+
 #include "move_helper.h"
+#include "multi_bot_helpers.h"
 
 
 void 
@@ -70,10 +71,7 @@ calc_boundary_box_in_region(matrix_t *mdl, region_t r, region_t* bb){
     return num_filled;
 }
 
-typedef struct{
-    bot_t bot;
-    GArray * cmds;
-} bot_commands_t;
+
 
 
 typedef struct{
