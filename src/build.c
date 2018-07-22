@@ -295,7 +295,11 @@ main (int argc, char *argv[]) {
     matrix_t model = read_model_file(argv[1]);
     matrix_t phases, blobs;
 
-    make_plan(&model, &phases, &blobs);
+    int num_phases = make_plan(&model, &phases, &blobs);
+    if (num_phases > 1) {
+        fprintf(stderr, "Can't build with %d phases\n", num_phases);
+        return 1;
+    }
 
     state_t state = make_start_state(model.resolution);
 
