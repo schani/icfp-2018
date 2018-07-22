@@ -20,6 +20,7 @@ typedef enum {
     GFill,
     GVoid
 } command_type_t;
+#define COMMAND_MAX GVoid
 
 
 typedef struct {
@@ -140,8 +141,8 @@ gvoid_cmd(coord_t nd, coord_t fd)
 
 	command_t cmd;
     cmd.type = GVoid;
-    cmd.GFill_nd = nd;
-    cmd.GFill_fd = fd;
+    cmd.GVoid_nd = nd;
+    cmd.GVoid_fd = fd;
     return cmd;
 }
 
@@ -175,12 +176,15 @@ fusions_cmd(coord_t nd)
 {
     command_t cmd;
     cmd.type = FusionS;
-    cmd.FusionS_nd = nd;    
+    cmd.FusionS_nd = nd;  
+    return cmd;  
 }
 
 static inline void
 add_cmd(GArray *cmds, command_t cmd)
 {
+	assert(cmd.type >= 0);
+    assert(cmd.type <= COMMAND_MAX);
 	g_array_append_val(cmds, cmd);
 }
 

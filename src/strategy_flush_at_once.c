@@ -8,30 +8,6 @@
 #include "multi_bot_helpers.h"
 
 
-typedef struct{
-    bot_commands_t *b1;
-    bot_commands_t *b2;
-} bc2_t;
-
-
-typedef struct{
-    bot_commands_t *b1;
-    bot_commands_t *b2;
-    bot_commands_t *b3;
-    bot_commands_t *b4;
-} bc4_t;
-
-typedef struct{
-    bot_commands_t *b1;
-    bot_commands_t *b2;
-    bot_commands_t *b3;
-    bot_commands_t *b4;
-    bot_commands_t *b5;
-    bot_commands_t *b6;
-    bot_commands_t *b7;
-    bot_commands_t *b8;
-} bc8_t;
-
 
 
 
@@ -96,6 +72,12 @@ move_b3b4_to_pos_and_duplicate(matrix_t *mdl, multi_bot_commands_t *mbc, coord_t
 
 }
 
+void debugBotPos(bot_t * bot){
+    printf("BotId: %d\n", bot->bid);
+    printf("BotPos: %d %d %d\n", bot->pos.x, bot->pos.y, bot->pos.z);
+}
+
+
 void
 move_b5b6b7b8_to_pos_and_void(matrix_t *mdl, multi_bot_commands_t *mbc, coord_t b5_target, coord_t b6_target, coord_t b7_target, coord_t b8_target){
     int wait_time;
@@ -138,17 +120,24 @@ move_b5b6b7b8_to_pos_and_void(matrix_t *mdl, multi_bot_commands_t *mbc, coord_t 
     wait_n_rounds(mbc->bot_commands[3].cmds, wait_time);
 
     /* void the region surrounded */
-    add_cmd(mbc->bot_commands[0].cmds, gvoid_cmd(create_coord( 1, 0,  1), create_coord( mdl->resolution-3,  mdl->resolution-1,  mdl->resolution-3)));
-    add_cmd(mbc->bot_commands[7].cmds, gvoid_cmd(create_coord(-1, 0, -1), create_coord(-mdl->resolution-3, -mdl->resolution-1, -mdl->resolution-3)));
+    add_cmd(mbc->bot_commands[0].cmds, gvoid_cmd(create_coord( 1, 0,  1), create_coord(  mdl->resolution-2,   mdl->resolution,   mdl->resolution-2)));
+    add_cmd(mbc->bot_commands[7].cmds, gvoid_cmd(create_coord(-1, 0, -1), create_coord(-(mdl->resolution-2), -mdl->resolution, -(mdl->resolution-2))));
 
-    add_cmd(mbc->bot_commands[1].cmds, gvoid_cmd(create_coord(-1, 0,  1), create_coord(-mdl->resolution-3,  mdl->resolution-1,  mdl->resolution-3)));
-    add_cmd(mbc->bot_commands[6].cmds, gvoid_cmd(create_coord( 1, 0, -1), create_coord( mdl->resolution-3, -mdl->resolution-1, -mdl->resolution-3)));
+    add_cmd(mbc->bot_commands[1].cmds, gvoid_cmd(create_coord(-1, 0,  1), create_coord(-(mdl->resolution-2),  mdl->resolution,   mdl->resolution-2)));
+    add_cmd(mbc->bot_commands[6].cmds, gvoid_cmd(create_coord( 1, 0, -1), create_coord(  mdl->resolution-2,  -mdl->resolution, -(mdl->resolution-2))));
 
-    add_cmd(mbc->bot_commands[2].cmds, gvoid_cmd(create_coord( 1, 0, -1), create_coord( mdl->resolution-3,  mdl->resolution-1, -mdl->resolution-3)));
-    add_cmd(mbc->bot_commands[5].cmds, gvoid_cmd(create_coord(-1, 0,  1), create_coord(-mdl->resolution-3, -mdl->resolution-1,  mdl->resolution-3)));
+    add_cmd(mbc->bot_commands[2].cmds, gvoid_cmd(create_coord( 1, 0, -1), create_coord(  mdl->resolution-2,   mdl->resolution, -(mdl->resolution-2))));
+    add_cmd(mbc->bot_commands[5].cmds, gvoid_cmd(create_coord(-1, 0,  1), create_coord(-(mdl->resolution-2), -mdl->resolution,   mdl->resolution-2)));
 
-    add_cmd(mbc->bot_commands[3].cmds, gvoid_cmd(create_coord(-1, 0, -1), create_coord(-mdl->resolution-3,  mdl->resolution-1, -mdl->resolution-3)));
-    add_cmd(mbc->bot_commands[4].cmds, gvoid_cmd(create_coord( 1, 0,  1), create_coord( mdl->resolution-3, -mdl->resolution-1,  mdl->resolution-3)));
+    add_cmd(mbc->bot_commands[3].cmds, gvoid_cmd(create_coord(-1, 0, -1), create_coord(-(mdl->resolution-2),  mdl->resolution, -(mdl->resolution-2))));
+    add_cmd(mbc->bot_commands[4].cmds, gvoid_cmd(create_coord( 1, 0,  1), create_coord(  mdl->resolution-2,  -mdl->resolution,   mdl->resolution-2)));
+
+
+    for(int i=0; i<mbc->n_bots; ++i){
+        debugBotPos(&mbc->bot_commands[i].bot);
+    }
+
+
 
 }
 
@@ -244,7 +233,7 @@ move_b2_to_pos_and_fuse(matrix_t *mdl, multi_bot_commands_t *mbc, coord_t b2_tar
 }
 
 GArray* 
-exec_flush_at_once(matrix_t *mdl, bot_t bot1){
+exec_flush_at_once(matrix_t *mdl, bot_t *bot1){
 
     /* only applicabl for small resolutions */
     assert(mdl->resolution<=30);
@@ -252,7 +241,7 @@ exec_flush_at_once(matrix_t *mdl, bot_t bot1){
 
     multi_bot_commands_t mbc = make_multi_bot_commands(8);
 
-    mbc.bot_commands[0] = make_bot_commands(bot1);
+    mbc.bot_commands[0] = make_bot_commands(*bot1);
 
     initial_spawn(mdl, &mbc, create_coord(1,0,0));
     move_b2_to_pos_and_duplicate(mdl, &mbc, create_coord(mdl->resolution-1,0,0), create_coord(0,0,1));

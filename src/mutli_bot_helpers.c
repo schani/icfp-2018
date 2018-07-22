@@ -33,10 +33,10 @@ bot_commands_t fission(bot_commands_t* bc, coord_t rel_pos) {
     int m = bc->bot.n_seeds / 2;
     add_cmd(bc->cmds, fission_cmd(rel_pos, m));
 
-    bot_t botp = make_bot(bc->bot.seeds[0], add_coords(bc->bot.pos, rel_pos), m, bc->bot.seeds + 1);
+    bot_t spawned = make_bot(bc->bot.seeds[0], add_coords(bc->bot.pos, rel_pos), m, bc->bot.seeds + 1);
     bc->bot = make_bot(bc->bot.bid, bc->bot.pos, bc->bot.n_seeds - 1 - m, bc->bot.seeds + 1 + m);
 
-    bot_commands_t new_bot = internal_make_bot_commands(botp, bc->cmds->len);
+    bot_commands_t new_bot = internal_make_bot_commands(spawned, bc->cmds->len);
 
     return new_bot;
 }
@@ -71,6 +71,8 @@ remove_bot(int fusioned, multi_bot_commands_t mbc) {
     // mbc is a copy ;-)
     mbc.n_bots = mbc.n_bots-1;
     mbc.bot_commands[fusioned] = mbc.bot_commands[mbc.n_bots-1];
+    // FIXME bubble up rather thand sorting
+    sort_bot_commands(mbc.bot_commands, mbc.n_bots);
     return mbc;
 }
 
@@ -80,25 +82,34 @@ command_t* mbc_get_command(multi_bot_commands_t mbc, int bot_index, int cmd_inde
 }
 
 static void
-internal_merge_bot_commands(multi_bot_commands_t mbc, GArray* cmds, int initial_bot_skew, int cmd_offset) {
+internal_merge_bot_commands(multi_bot_commands_t mbc, GArray* cmds, int cmd_offset) {
     sort_bot_commands(mbc.bot_commands, mbc.n_bots);
 
+    //printf("==== <merge> =====\n");
+
     while(mbc_get_command(mbc, 0, cmd_offset)->type != Halt) {
-        for(int i=initial_bot_skew; i<mbc.n_bots; i++) {
+        for(int i=0; i<mbc.n_bots; i++) {
             command_t* curr = mbc_get_command(mbc, i, cmd_offset);
-            if (curr->type >= 0) {
+            if (curr->type >= 0 && curr->type <= COMMAND_MAX) {
                 add_cmd(cmds, *curr);
+                printf("%d %d:", i, mbc.bot_commands[i].bot.bid);
+                print_cmd(*curr);
                 if(curr->type == FusionS) {
-                    return internal_merge_bot_commands(remove_bot(i, mbc), cmds, i+1, cmd_offset);
+                    mbc = remove_bot(i, mbc);
+                    i--;
                 }
             } else {
                 // we skipped a prefix of invalid commands here.
             }
         }
-        initial_bot_skew = 0;
         cmd_offset++;
+        printf("==== %d =====\n", cmd_offset);
     }
     add_cmd(cmds, *mbc_get_command(mbc, 0, cmd_offset));
+
+    print_cmd(*mbc_get_command(mbc, 0, cmd_offset));
+
+    //printf("==== </merge> =====\n");
 }
 
 GArray* merge_bot_commands(multi_bot_commands_t mbc) {
@@ -109,6 +120,6 @@ GArray* merge_bot_commands(multi_bot_commands_t mbc) {
 
     // overallocate because we will have some invalid at the beginning.
     GArray* cmds = g_array_sized_new (FALSE, FALSE, sizeof(command_t), total_length);
-    internal_merge_bot_commands(mbc, cmds, 0, 0);
+    internal_merge_bot_commands(mbc, cmds, 0);
     return cmds;
 }
