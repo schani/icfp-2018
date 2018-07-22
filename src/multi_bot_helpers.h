@@ -1,7 +1,9 @@
 #ifndef __MULTI_BOT_HELPERS_H
 #define __MULTI_BOT_HELPERS_H
 
-typedef struct bot_commands_t;
+#include "coord.h"
+
+typedef struct {} bot_commands_t;
 
 coord_t get_bot_pos(bot_commands_t* bc);
 void set_bot_pos(bot_commands_t* bc, coord_t coord);
