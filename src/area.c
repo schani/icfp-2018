@@ -1,19 +1,7 @@
 #include "area.h"
 #include "model.h"
 #include "trace.h"
-
-// FIXME make public
-static region_t
-extend_region(region_t r_in, coord_t c) {
-    region_t r;
-    r.c_min.x = MIN(r_in.c_min.x, c.x);
-    r.c_max.x = MAX(r_in.c_max.x, c.x);
-    r.c_min.y = MIN(r_in.c_min.y, c.y);
-    r.c_max.y = MAX(r_in.c_max.y, c.y);
-    r.c_min.z = MIN(r_in.c_min.z, c.z);
-    r.c_max.z = MAX(r_in.c_max.z, c.z);
-    return r;
-}
+#include "region.h"
 
 static area_t
 make_area(int blob_id, int phase, coord_t coord) {
