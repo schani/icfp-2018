@@ -23,6 +23,7 @@ bot_commands_t make_bot_commands(bot_t bot);
 // returns the new bot
 // FIXME add m parameter later if needed.
 bot_commands_t fission(bot_commands_t* bc, coord_t rel_pos);
+bot_commands_t fission_with_m(bot_commands_t* bc, coord_t rel_pos, int m);
 void fusion(bot_commands_t* bc_primary, bot_commands_t* bc_secondary);
 
 static inline coord_t 
@@ -36,5 +37,8 @@ void set_bot_pos(bot_commands_t* bc, coord_t coord) {
 
 // returns the command trace of all bots together 
 GArray* merge_bot_commands(multi_bot_commands_t mbc);
+
+void equalize_multi_bot_commands(multi_bot_commands_t mbc);
+
 
 #endif  // __MULTI_BOT_HELPERS_H

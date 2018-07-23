@@ -72,10 +72,6 @@ calc_region_intersection(region_t r1, region_t r2){
 bool 
 region_equal(region_t* r1, region_t* r2);
 
-region_grid_t
-make_region_grid(region_t r, int cols, int rows);
-
-
 region_grid_t split_region(region_t r, int rows, int cols);
 
 

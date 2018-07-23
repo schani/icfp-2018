@@ -2,6 +2,8 @@
 
 #include "coord.h"
 
+#include <glib.h>
+
 bot_commands_t
 internal_make_bot_commands(bot_t bot, int skipped_rounds) {
     bot_commands_t bc;
@@ -28,9 +30,11 @@ multi_bot_commands_t make_multi_bot_commands(int n_bots) {
 
 // returns the new bot
 bot_commands_t fission(bot_commands_t* bc, coord_t rel_pos) {
+    return fission_with_m(bc, rel_pos, bc->bot.n_seeds/2);
+}
+bot_commands_t fission_with_m(bot_commands_t* bc, coord_t rel_pos, int m) {
     // when this asserts implement passing in m
     assert(bc->bot.n_seeds > 0);
-    int m = bc->bot.n_seeds / 2;
     add_cmd(bc->cmds, fission_cmd(rel_pos, m));
 
     bot_t spawned = make_bot(bc->bot.seeds[0], add_coords(bc->bot.pos, rel_pos), m, bc->bot.seeds + 1);
@@ -107,7 +111,7 @@ internal_merge_bot_commands(multi_bot_commands_t mbc, GArray* cmds, int cmd_offs
     }
     add_cmd(cmds, *mbc_get_command(mbc, 0, cmd_offset));
 
-    // print_cmd(*mbc_get_command(mbc, 0, cmd_offset));
+    //print_cmd(*mbc_get_command(mbc, 0, cmd_offset));
 
     //printf("==== </merge> =====\n");
 }
@@ -122,4 +126,16 @@ GArray* merge_bot_commands(multi_bot_commands_t mbc) {
     GArray* cmds = g_array_sized_new (FALSE, FALSE, sizeof(command_t), total_length);
     internal_merge_bot_commands(mbc, cmds, 0);
     return cmds;
+}
+
+void equalize_multi_bot_commands(multi_bot_commands_t mbc) {
+    int max_len = 0;
+    for (int i = 0; i < mbc.n_bots; i++) {
+        max_len = MAX(mbc.bot_commands[i].cmds->len, max_len);
+    }
+    for (int i = 0; i < mbc.n_bots; i++) {
+        while(mbc.bot_commands[i].cmds->len < max_len) {
+            add_cmd(mbc.bot_commands[i].cmds, wait_cmd());
+        }
+    } 
 }
