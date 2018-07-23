@@ -63,7 +63,7 @@ else
 fi
 
 # save space when collecting
-#rm -rf input-models
+rm -rf input-models
 
 EOF
     chmod +x "$BUILDDIR/run.sh"
