@@ -114,7 +114,7 @@ internal_merge_bot_commands(multi_bot_commands_t mbc, GArray* cmds, int cmd_offs
 
 GArray* merge_bot_commands(multi_bot_commands_t mbc) {
     int total_length = 0;
-    for (int i; i<mbc.n_bots; i++) {
+    for (int i=0; i<mbc.n_bots; i++) {
         total_length += mbc.bot_commands[i].cmds->len;
     }
 
