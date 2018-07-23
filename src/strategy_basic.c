@@ -141,7 +141,7 @@ void_a_boundary_box(matrix_t *mdl, region_t* bb, multi_bot_commands_t *mbc){
 
     xyz_t cur_bot_y = bb->c_max.y+1;
 
-	for (xyz_t y = bb->c_max.y+1; y > bb->c_min.y; y++)
+	for (xyz_t y = cur_bot_y; y > bb->c_min.y; y--)
 	{
     	region_t next_row = make_region(create_coord(bb->c_min.x, y-1, bb->c_min.z), create_coord(bb->c_max.x, y-1, bb->c_max.z));
 		if (region_is_empty(mdl, next_row)) continue;
@@ -161,10 +161,10 @@ void_a_boundary_box(matrix_t *mdl, region_t* bb, multi_bot_commands_t *mbc){
         cur_bot_y = y;
 
         /* void the region below */
-		add_cmd(mbc->bot_commands[0].cmds, gvoid_cmd(create_coord(0, -1, 0), create_coord(bb->c_max.x, 0, bb->c_max.z)));
-		add_cmd(mbc->bot_commands[1].cmds, gvoid_cmd(create_coord(0, -1, 0), create_coord(bb->c_max.x, 0, bb->c_min.z)));
-		add_cmd(mbc->bot_commands[2].cmds, gvoid_cmd(create_coord(0, -1, 0), create_coord(bb->c_min.x, 0, bb->c_min.z)));
-		add_cmd(mbc->bot_commands[3].cmds, gvoid_cmd(create_coord(0, -1, 0), create_coord(bb->c_min.x, 0, bb->c_max.z)));
+		add_cmd(mbc->bot_commands[0].cmds, gvoid_cmd(create_coord(0, -1, 0), create_coord(bb->c_max.x-bb->c_min.x, 0, bb->c_max.z-bb->c_min.z)));
+		add_cmd(mbc->bot_commands[1].cmds, gvoid_cmd(create_coord(0, -1, 0), create_coord(bb->c_min.x-bb->c_max.x, 0, bb->c_min.z-bb->c_min.z)));
+		add_cmd(mbc->bot_commands[2].cmds, gvoid_cmd(create_coord(0, -1, 0), create_coord(bb->c_min.x-bb->c_max.x, 0, bb->c_min.z-bb->c_max.z)));
+		add_cmd(mbc->bot_commands[3].cmds, gvoid_cmd(create_coord(0, -1, 0), create_coord(bb->c_max.x-bb->c_min.x, 0, bb->c_min.z-bb->c_max.z)));
         time += 1;
 	}
 
@@ -283,15 +283,29 @@ bot_spawn(matrix_t *mdl, multi_bot_commands_t *mbc, int mbc_id_src, int mbc_id_t
 void
 bot_spawn_quadrupel(matrix_t *mdl, multi_bot_commands_t *mbc, int mbc_id_src, int length_side){
 
-    int id2 = mbc_id_src + 1;
+    
+    //spawn bot1
     bot_spawn(mdl, mbc, mbc_id_src, mbc_id_src + 1, create_coord(1,0,0));
-    int time = move_bot_in_multibot_setting(&mbc->bot_commands[id2], create_coord(length_side-2, 0, 0));
+    int time = move_bot_in_multibot_setting(&mbc->bot_commands[mbc_id_src + 1], create_coord(length_side-2, 0, 0));
     wait_n_rounds(&mbc->bot_commands[mbc_id_src], time);
+    //spawn bot 2
+    bot_spawn(mdl, mbc, mbc_id_src + 1, mbc_id_src + 2, create_coord(0,0,1));
+    //spawn bot 3
+    bot_spawn(mdl, mbc, mbc_id_src,     mbc_id_src + 3, create_coord(0,0,1));
 
+    time = move_bot_in_multibot_setting(&mbc->bot_commands[mbc_id_src+2], create_coord(0, 0, length_side-2));
+    move_bot_in_multibot_setting(&mbc->bot_commands[mbc_id_src+3], create_coord(0, 0, length_side-2));
+    wait_n_rounds(&mbc->bot_commands[mbc_id_src],   time);
+    wait_n_rounds(&mbc->bot_commands[mbc_id_src+1], time);
 
 }
 
 
+
+
+
+
+#define QLENGTH 30
 
 GArray* 
 exec_test_bb_flush(matrix_t *mdl, bot_t *bot1){
@@ -311,9 +325,20 @@ exec_test_bb_flush(matrix_t *mdl, bot_t *bot1){
     coord_t above_min_bb = create_coord(bb_overall.c_min.x, bb_overall.c_max.y +1, bb_overall.c_min.z);
     move_bot_in_multibot_setting(&mbc.bot_commands[0], sub_coords(above_min_bb, mbc.bot_commands[0].bot.pos) );
 
-    bot_spawn_quadrupel(mdl, &mbc, 0, 30);
 
-    mbc.n_bots = 2;
+    
+
+    bot_spawn_quadrupel(mdl, &mbc, 0, QLENGTH);
+
+    coord_t sub_bb_min=create_coord(mbc.bot_commands[0].bot.pos.x, 0, mbc.bot_commands[0].bot.pos.z);
+    coord_t sub_bb_max=create_coord(mbc.bot_commands[2].bot.pos.x,  mdl->resolution-1, mbc.bot_commands[2].bot.pos.z);
+    region_t sub_bb_mask = make_region(sub_bb_min,sub_bb_max);
+    region_t sub_bb;
+    int voxels_in_sub_bb = calc_boundary_box_in_region(mdl, sub_bb_mask, &sub_bb);
+
+    void_a_boundary_box(mdl, &sub_bb, &mbc);
+
+    mbc.n_bots = 4;
     return merge_bot_commands(mbc);
 
 }
