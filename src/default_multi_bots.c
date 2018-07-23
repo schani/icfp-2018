@@ -81,6 +81,54 @@ gather_bots(multi_bot_commands_t* mbc) {
     }
 }
 
+
+void
+move_bots_to_grid(region_grid_t *r, multi_bot_commands_t *mbc){
+    move_bot_in_multibot_setting(&mbc->bot_commands[0], r->regions[0].c_min);
+    for (int i=1; i<4; i++) {
+      //mbc.bot_commands[i] = fission_with_m(&mbc.bot_commands[0], create_coord(0, 1, 0), 0);
+      //mbc.n_bots++;
+        move_bot_in_multibot_setting(&mbc->bot_commands[i], above(r->regions[4-i].c_min));
+        equalize_multi_bot_commands(*mbc);    
+    }
+    equalize_multi_bot_commands(*mbc);
+
+
+}
+
+
+void
+calc_multi_bot_constructor_trace(matrix_t *m, multi_bot_commands_t *mbc) {
+
+    region_t rf = matrix_region(m);
+
+    int cols = 2;
+    int rows = 2;
+    region_grid_t grid = split_region(rf, rows, cols);
+    
+    move_bots_to_grid(&grid, mbc);
+ 
+
+    fill_one_region(m, &mbc->bot_commands[0], get_grid_region(grid, 0, 0));
+    for (int i=1; i < mbc->n_bots; i++) {
+        fill_one_region(m, &mbc->bot_commands[i], grid.regions[mbc->n_bots-i]);
+    }
+
+    equalize_multi_bot_commands(*mbc);
+
+    gather_bots(mbc);
+
+    move_bot_in_multibot_setting(&mbc->bot_commands[0], sub_coords(create_coord(0,get_bot_pos(&mbc->bot_commands[0]).y,0), get_bot_pos(&mbc->bot_commands[0])));
+    move_bot_in_multibot_setting(&mbc->bot_commands[0], sub_coords(create_coord(0,0,0), get_bot_pos(&mbc->bot_commands[0])));
+
+    add_cmd(mbc->bot_commands[0].cmds, flip_cmd());
+    add_cmd(mbc->bot_commands[0].cmds, halt_cmd());
+
+    
+}
+
+
+
 GArray* calc_multi_bot_default_trace(matrix_t *m, bot_t initial_bot) {
     region_t rf = matrix_region(m);
 

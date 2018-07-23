@@ -9,7 +9,7 @@
 #include "default_multi_bots.h"
 
 extern GArray* exec_test_bb_flush_and_exit(matrix_t *mdl, bot_t *bot1);
-
+extern GArray* exec_test_bb_flush_and_rebuild(matrix_t *mdl, matrix_t *targetmdl, bot_t *bot1);
 
 int main(int argc, char** argv) {
 
@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
       break;
     case 'R':
       start = make_start_state_from_matrix(m1, Thunderbolt);
-      //cmds = exec_test_bb_flush_and_rebuild(&start.matrix, &m2, &start.bots[0]);
+      cmds = exec_test_bb_flush_and_rebuild(&start.matrix, &m2, &start.bots[0]);
       break;
     default:
       assert(FALSE);
