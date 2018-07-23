@@ -12,7 +12,8 @@
 
 
 
-void wait_n_rounds(GArray *cmds, int n){
+static void 
+wait_n_rounds(GArray *cmds, int n){
     assert(n>=0);
     for(int i=0;i<n;++i){
         add_cmd(cmds, wait_cmd());

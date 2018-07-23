@@ -8,6 +8,18 @@
 #include "multi_bot_helpers.h"
 
 
+
+static void 
+debug_bb(region_t *bb){
+    printf("BB: min=(%d, %d, %d); max=(%d, %d, %d)\n", bb->c_min.x, bb->c_min.y, bb->c_min.z, bb->c_max.x, bb->c_max.y, bb->c_max.z);
+}
+
+static void
+debug_coord(coord_t c){
+    printf("Coord: %d, %d, %d\n", c.x, c.y, c.z);
+}
+
+
 void 
 copy_region(region_t* target, region_t *src){
     memcpy(target, src, sizeof(region_t));
@@ -18,8 +30,9 @@ int
 calc_boundary_box_in_region(matrix_t *mdl, region_t r, region_t* bb){
 
     int num_filled = 0;
-    if(region_is_empty(mdl, r)){
 
+    
+    if(region_is_empty(mdl, r)){
         /* return original bb with filled size 0*/
         copy_region(bb, &r);
         return num_filled;
@@ -33,6 +46,10 @@ calc_boundary_box_in_region(matrix_t *mdl, region_t r, region_t* bb){
 
     coord_t minFull = r.c_max;
     coord_t maxFull = r.c_min;
+
+
+    //debug_coord(minFull);
+    //debug_coord(maxFull);
 
     /* iterate through voxels. update min and max, count number of full voxels */
 	FOR_EACH_COORD(cur, r)
@@ -67,6 +84,12 @@ calc_boundary_box_in_region(matrix_t *mdl, region_t r, region_t* bb){
 		}
 	}
 	END_FOR_EACH_COORD;
+
+    //debug_coord(minFull);
+    //debug_coord(maxFull);
+
+    bb->c_min = minFull;
+    bb->c_max = maxFull;
 
     return num_filled;
 }
@@ -111,8 +134,10 @@ z
 
 
 
-void
+int
 void_a_boundary_box(matrix_t *mdl, region_t* bb, multi_bot_commands_t *mbc){
+
+    int time=0;
 
     xyz_t cur_bot_y = bb->c_max.y+1;
 
@@ -123,7 +148,7 @@ void_a_boundary_box(matrix_t *mdl, region_t* bb, multi_bot_commands_t *mbc){
 
         /* move bots down */
 
-		goto_rel_pos(create_coord(0, y-cur_bot_y, 0), mbc->bot_commands[0].cmds);
+		time += goto_rel_pos(create_coord(0, y-cur_bot_y, 0), mbc->bot_commands[0].cmds);
 		goto_rel_pos(create_coord(0, y-cur_bot_y, 0), mbc->bot_commands[1].cmds);
 		goto_rel_pos(create_coord(0, y-cur_bot_y, 0), mbc->bot_commands[2].cmds);
 		goto_rel_pos(create_coord(0, y-cur_bot_y, 0), mbc->bot_commands[3].cmds);
@@ -140,11 +165,22 @@ void_a_boundary_box(matrix_t *mdl, region_t* bb, multi_bot_commands_t *mbc){
 		add_cmd(mbc->bot_commands[1].cmds, gvoid_cmd(create_coord(0, -1, 0), create_coord(bb->c_max.x, 0, bb->c_min.z)));
 		add_cmd(mbc->bot_commands[2].cmds, gvoid_cmd(create_coord(0, -1, 0), create_coord(bb->c_min.x, 0, bb->c_min.z)));
 		add_cmd(mbc->bot_commands[3].cmds, gvoid_cmd(create_coord(0, -1, 0), create_coord(bb->c_min.x, 0, bb->c_max.z)));
-        
+        time += 1;
 	}
+
+    return time;
 
 }
 
+
+
+static void 
+wait_n_rounds(bot_commands_t *bc, int n){
+    assert(n>=0);
+    for(int i=0;i<n;++i){
+        add_cmd(bc->cmds, wait_cmd());
+    }
+}
 
 
 int
@@ -155,14 +191,14 @@ move_bot_in_multibot_setting(bot_commands_t *bc, coord_t rel_movement){
     return steps;
 }
 
-void
+int
 move_up_and_to_next_bb_xdirection(matrix_t *mdl, region_t* bb, multi_bot_commands_t *mbc){
     
     xyz_t cur_bot_y = get_bot_pos(&mbc->bot_commands[0]).y;
     xyz_t next_bot_y = bb->c_max.y+1;
 
     /* move up again */
-    move_bot_in_multibot_setting(&mbc->bot_commands[0], create_coord(0, next_bot_y-cur_bot_y, 0));
+    int time_up = move_bot_in_multibot_setting(&mbc->bot_commands[0], create_coord(0, next_bot_y-cur_bot_y, 0));
     move_bot_in_multibot_setting(&mbc->bot_commands[1], create_coord(0, next_bot_y-cur_bot_y, 0));
     move_bot_in_multibot_setting(&mbc->bot_commands[2], create_coord(0, next_bot_y-cur_bot_y, 0));
     move_bot_in_multibot_setting(&mbc->bot_commands[3], create_coord(0, next_bot_y-cur_bot_y, 0));
@@ -175,22 +211,36 @@ move_up_and_to_next_bb_xdirection(matrix_t *mdl, region_t* bb, multi_bot_command
     xyz_t xdiff_back = bb->c_min.x - mbc->bot_commands[0].bot.pos.x;
     coord_t xmove_back = create_coord(xdiff_back, 0, 0);
 
-    move_bot_in_multibot_setting(&mbc->bot_commands[0], xmove_back);
-    move_bot_in_multibot_setting(&mbc->bot_commands[1], xmove_front);
+    int time_back = move_bot_in_multibot_setting(&mbc->bot_commands[0], xmove_back);
+    int time_front = move_bot_in_multibot_setting(&mbc->bot_commands[1], xmove_front);
     move_bot_in_multibot_setting(&mbc->bot_commands[2], xmove_front);
     move_bot_in_multibot_setting(&mbc->bot_commands[3], xmove_back);
+
+
+    int time_move=MAX(time_back, time_front);
+    if(time_move > time_back){
+        wait_n_rounds(&mbc->bot_commands[0], time_move - time_back);
+        wait_n_rounds(&mbc->bot_commands[3], time_move - time_back);
+    }
+    if(time_move > time_front){
+        wait_n_rounds(&mbc->bot_commands[1], time_move - time_front);
+        wait_n_rounds(&mbc->bot_commands[2], time_move - time_front);
+    }
+    return time_up + time_move;
+    
 }
 
 
 
-void
+int
 move_up_and_to_next_bb_zdirection(matrix_t *mdl, region_t* bb, multi_bot_commands_t *mbc){
     
+
     xyz_t cur_bot_y = get_bot_pos(&mbc->bot_commands[0]).y;
     xyz_t next_bot_y = bb->c_max.y+1;
 
     /* move up again */
-    move_bot_in_multibot_setting(&mbc->bot_commands[0], create_coord(0, next_bot_y-cur_bot_y, 0));
+    int time_up = move_bot_in_multibot_setting(&mbc->bot_commands[0], create_coord(0, next_bot_y-cur_bot_y, 0));
     move_bot_in_multibot_setting(&mbc->bot_commands[1], create_coord(0, next_bot_y-cur_bot_y, 0));
     move_bot_in_multibot_setting(&mbc->bot_commands[2], create_coord(0, next_bot_y-cur_bot_y, 0));
     move_bot_in_multibot_setting(&mbc->bot_commands[3], create_coord(0, next_bot_y-cur_bot_y, 0));
@@ -203,27 +253,68 @@ move_up_and_to_next_bb_zdirection(matrix_t *mdl, region_t* bb, multi_bot_command
     xyz_t zdiff_back = bb->c_min.z - mbc->bot_commands[0].bot.pos.z;
     coord_t zmove_back = create_coord(0,0, zdiff_back);
 
-    move_bot_in_multibot_setting(&mbc->bot_commands[0], zmove_back);
-    move_bot_in_multibot_setting(&mbc->bot_commands[1], zmove_front);
-    move_bot_in_multibot_setting(&mbc->bot_commands[2], zmove_front);
-    move_bot_in_multibot_setting(&mbc->bot_commands[3], zmove_back);
+    
+    int time_back = move_bot_in_multibot_setting(&mbc->bot_commands[0], zmove_back);
+    move_bot_in_multibot_setting(&mbc->bot_commands[1], zmove_back);
+    int time_front = move_bot_in_multibot_setting(&mbc->bot_commands[2], zmove_front);
+    move_bot_in_multibot_setting(&mbc->bot_commands[3], zmove_front);
+
+    int time_move=MAX(time_back, time_front);
+    if(time_move > time_back){
+        wait_n_rounds(&mbc->bot_commands[0], time_move - time_back);
+        wait_n_rounds(&mbc->bot_commands[1], time_move - time_back);
+    }
+    if(time_move > time_front){
+        wait_n_rounds(&mbc->bot_commands[2], time_move - time_front);
+        wait_n_rounds(&mbc->bot_commands[3], time_move - time_front);
+    }
+    return time_up + time_move;
+
 }
 
 
 void
 bot_spawn(matrix_t *mdl, multi_bot_commands_t *mbc, int mbc_id_src, int mbc_id_trg, coord_t spawn_vect){
     /* spawn the new bot */
-    mbc->bot_commands[1] = fission(&mbc->bot_commands[0], spawn_vect);
+    mbc->bot_commands[mbc_id_trg] = fission(&mbc->bot_commands[mbc_id_src], spawn_vect);
+}
+
+
+void
+bot_spawn_quadrupel(matrix_t *mdl, multi_bot_commands_t *mbc, int mbc_id_src, int length_side){
+
+    int id2 = mbc_id_src + 1;
+    bot_spawn(mdl, mbc, mbc_id_src, mbc_id_src + 1, create_coord(1,0,0));
+    int time = move_bot_in_multibot_setting(&mbc->bot_commands[id2], create_coord(length_side-2, 0, 0));
+    wait_n_rounds(&mbc->bot_commands[mbc_id_src], time);
+
+
 }
 
 
 
 GArray* 
 exec_test_bb_flush(matrix_t *mdl, bot_t *bot1){
+    int quadruple_count = 1;
+    multi_bot_commands_t mbc = make_multi_bot_commands(4 * quadruple_count);
+
+    region_t bb_overall = make_region(create_coord(0,0,0), create_coord(5,5,5));
+
+    mbc.bot_commands[0] = make_bot_commands(*bot1);
 
 
+    int filled_voxels = calc_boundary_box_in_region(mdl, make_region(create_coord(0,0,0), create_coord(mdl->resolution-1, mdl->resolution-1, mdl->resolution-1)), &bb_overall);
+    debug_bb(&bb_overall);
+    printf("Filled Voxels: %d\n", filled_voxels);
 
+    /* move initial bot above min of bounding box */
+    coord_t above_min_bb = create_coord(bb_overall.c_min.x, bb_overall.c_max.y +1, bb_overall.c_min.z);
+    move_bot_in_multibot_setting(&mbc.bot_commands[0], sub_coords(above_min_bb, mbc.bot_commands[0].bot.pos) );
 
+    bot_spawn_quadrupel(mdl, &mbc, 0, 30);
+
+    mbc.n_bots = 2;
+    return merge_bot_commands(mbc);
 
 }
 
