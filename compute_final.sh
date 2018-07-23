@@ -61,6 +61,10 @@ then
 else
 	touch FAILED_\$?
 fi
+
+# save space when collecting
+rm -rf input-models
+
 EOF
     chmod +x "$BUILDDIR/run.sh"
 
