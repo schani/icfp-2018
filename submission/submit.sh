@@ -25,7 +25,7 @@ for filename in $GENTRACEDIR/*.tar.gz; do
     tar -C "$TMPDIR" -xzf "$filename" ./result
 done
 rm -f Traces/*
-cp "$TMPDIR/result/*.nbt" Traces/.
+cp $TMPDIR/result/*.nbt Traces/.
 
 REV=$(git rev-parse --short HEAD)
 TS=$(date +%Y%m%d_%H%M%S)
@@ -52,7 +52,7 @@ SHA=$(sha256sum "$DIR/$FILE.zip" | awk '{ print $1 }')
 ## TODO: heinz please copy file to URL
 ## copy $DIR/$FILE to $URL
 # note: this will only work from inside tuwien
-scp "$DIR/$FILE.*" icfp2018@www.tilab.tuwien.ac.at:html/.
+scp $DIR/$FILE.* icfp2018@www.tilab.tuwien.ac.at:html/.
 
 curl -L \
   --data-urlencode action=submit \
