@@ -3,7 +3,7 @@
 #include <string.h>
 #include <gmodule.h>
 #include "default_trace.h"
-
+#include "region.h"
 #include "move_helper.h"
 #include "multi_bot_helpers.h"
 
@@ -162,7 +162,7 @@ void_a_boundary_box(matrix_t *mdl, region_t* bb, multi_bot_commands_t *mbc){
 
         /* void the region below */
 		add_cmd(mbc->bot_commands[0].cmds, gvoid_cmd(create_coord(0, -1, 0), create_coord(bb->c_max.x-bb->c_min.x, 0, bb->c_max.z-bb->c_min.z)));
-		add_cmd(mbc->bot_commands[1].cmds, gvoid_cmd(create_coord(0, -1, 0), create_coord(bb->c_min.x-bb->c_max.x, 0, bb->c_min.z-bb->c_min.z)));
+		add_cmd(mbc->bot_commands[1].cmds, gvoid_cmd(create_coord(0, -1, 0), create_coord(bb->c_min.x-bb->c_max.x, 0, bb->c_max.z-bb->c_min.z)));
 		add_cmd(mbc->bot_commands[2].cmds, gvoid_cmd(create_coord(0, -1, 0), create_coord(bb->c_min.x-bb->c_max.x, 0, bb->c_min.z-bb->c_max.z)));
 		add_cmd(mbc->bot_commands[3].cmds, gvoid_cmd(create_coord(0, -1, 0), create_coord(bb->c_max.x-bb->c_min.x, 0, bb->c_min.z-bb->c_max.z)));
         time += 1;
@@ -197,11 +197,19 @@ move_up_and_to_next_bb_xdirection(matrix_t *mdl, region_t* bb, multi_bot_command
     xyz_t cur_bot_y = get_bot_pos(&mbc->bot_commands[0]).y;
     xyz_t next_bot_y = bb->c_max.y+1;
 
+    debug_bb(bb);
+    debug_coord(mbc->bot_commands[1].bot.pos);
+
+
+
     /* move up again */
     int time_up = move_bot_in_multibot_setting(&mbc->bot_commands[0], create_coord(0, next_bot_y-cur_bot_y, 0));
     move_bot_in_multibot_setting(&mbc->bot_commands[1], create_coord(0, next_bot_y-cur_bot_y, 0));
     move_bot_in_multibot_setting(&mbc->bot_commands[2], create_coord(0, next_bot_y-cur_bot_y, 0));
     move_bot_in_multibot_setting(&mbc->bot_commands[3], create_coord(0, next_bot_y-cur_bot_y, 0));
+
+    debug_coord(mbc->bot_commands[1].bot.pos);
+
 
     /* move along X axis (front is in positive direction) */
     //for bots [1, 2]
@@ -300,12 +308,32 @@ bot_spawn_quadrupel(matrix_t *mdl, multi_bot_commands_t *mbc, int mbc_id_src, in
 
 }
 
+void
+bot_spawn_rect(matrix_t *mdl, multi_bot_commands_t *mbc, int mbc_id_src, int length_x, int length_z){
+
+    
+    //spawn bot1
+    bot_spawn(mdl, mbc, mbc_id_src, mbc_id_src + 1, create_coord(1,0,0));
+    int time = move_bot_in_multibot_setting(&mbc->bot_commands[mbc_id_src + 1], create_coord(length_x-2, 0, 0));
+    wait_n_rounds(&mbc->bot_commands[mbc_id_src], time);
+    //spawn bot 2
+    bot_spawn(mdl, mbc, mbc_id_src + 1, mbc_id_src + 2, create_coord(0,0,1));
+    //spawn bot 3
+    bot_spawn(mdl, mbc, mbc_id_src,     mbc_id_src + 3, create_coord(0,0,1));
+
+    time = move_bot_in_multibot_setting(&mbc->bot_commands[mbc_id_src+2], create_coord(0, 0, length_z-2));
+    move_bot_in_multibot_setting(&mbc->bot_commands[mbc_id_src+3], create_coord(0, 0, length_z-2));
+    wait_n_rounds(&mbc->bot_commands[mbc_id_src],   time);
+    wait_n_rounds(&mbc->bot_commands[mbc_id_src+1], time);
+
+}
 
 
 
 
 
-#define QLENGTH 30
+
+#define QLENGTH 20
 
 GArray* 
 exec_test_bb_flush(matrix_t *mdl, bot_t *bot1){
@@ -318,25 +346,88 @@ exec_test_bb_flush(matrix_t *mdl, bot_t *bot1){
 
 
     int filled_voxels = calc_boundary_box_in_region(mdl, make_region(create_coord(0,0,0), create_coord(mdl->resolution-1, mdl->resolution-1, mdl->resolution-1)), &bb_overall);
-    debug_bb(&bb_overall);
-    printf("Filled Voxels: %d\n", filled_voxels);
+
+    //printf("Overall BB:\n");
+    //debug_bb(&bb_overall);
+    //printf("Filled Voxels: %d\n", filled_voxels);
 
     /* move initial bot above min of bounding box */
     coord_t above_min_bb = create_coord(bb_overall.c_min.x, bb_overall.c_max.y +1, bb_overall.c_min.z);
     move_bot_in_multibot_setting(&mbc.bot_commands[0], sub_coords(above_min_bb, mbc.bot_commands[0].bot.pos) );
 
+	// turn off gravity
+    add_cmd(mbc.bot_commands[0].cmds, flip_cmd());
 
+
+    int rows = (bb_overall.c_max.x - bb_overall.c_min.x) / QLENGTH;
+    if((rows * QLENGTH) < (bb_overall.c_max.x - bb_overall.c_min.x)) {
+        rows += 1;
+    }
+    int cols = (bb_overall.c_max.z - bb_overall.c_min.z) / QLENGTH;
+    if((cols * QLENGTH) < (bb_overall.c_max.z - bb_overall.c_min.z)) {
+        cols += 1;
+    }
+
+
+    //printf("ROWS: %d; COLS: %d\n", rows, cols);
     
+    region_grid_t rgrid;
+    rgrid = split_region(bb_overall, rows, cols);
+    region_t r0 = get_grid_region(rgrid, 0,0);
+    /*
+    debug_bb(&r0);
+    r0 = get_grid_region(rgrid, 0,1);
+    debug_bb(&r0);
+    r0 = get_grid_region(rgrid, 0,2);
+    debug_bb(&r0);
+    r0 = get_grid_region(rgrid, 1,0);
+    debug_bb(&r0);
+    r0 = get_grid_region(rgrid, 1,1);
+    debug_bb(&r0);
+    r0 = get_grid_region(rgrid, 1,2);
+    debug_bb(&r0);
+    r0 = get_grid_region(rgrid, 2,0);
+    debug_bb(&r0);
+    r0 = get_grid_region(rgrid, 2,1);
+    debug_bb(&r0);
+    r0 = get_grid_region(rgrid, 2,2);
+    debug_bb(&r0);
+    
+    printf("-------\n");
 
-    bot_spawn_quadrupel(mdl, &mbc, 0, QLENGTH);
+*/
+    bot_spawn_rect(mdl, &mbc, 0, region_get_xsize(r0), region_get_zsize(r0));
+
+
+
+    for(int x=0; x<cols; ++x){
+        region_t r = get_grid_region(rgrid, 0, x);
+        move_up_and_to_next_bb_xdirection(mdl, &r, &mbc );
+        void_a_boundary_box(mdl, &r, &mbc);
+    }
+
+
+
+
+
+
+/*
 
     coord_t sub_bb_min=create_coord(mbc.bot_commands[0].bot.pos.x, 0, mbc.bot_commands[0].bot.pos.z);
     coord_t sub_bb_max=create_coord(mbc.bot_commands[2].bot.pos.x,  mdl->resolution-1, mbc.bot_commands[2].bot.pos.z);
     region_t sub_bb_mask = make_region(sub_bb_min,sub_bb_max);
-    region_t sub_bb;
-    int voxels_in_sub_bb = calc_boundary_box_in_region(mdl, sub_bb_mask, &sub_bb);
+
+    region_t sub_bb  = calc_region_intersection(sub_bb_mask, bb_overall);
+    //int voxels_in_sub_bb = calc_boundary_box_in_region(mdl, sub_bb_mask, &sub_bb);
 
     void_a_boundary_box(mdl, &sub_bb, &mbc);
+
+
+
+*/
+
+
+
 
     mbc.n_bots = 4;
     return merge_bot_commands(mbc);

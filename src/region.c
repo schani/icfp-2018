@@ -60,29 +60,38 @@ region_grid_t split_region(region_t r, int rows, int cols) {
     xyz_t dim_x = 1 + r.c_max.x - r.c_min.x;
     xyz_t dim_z = 1 + r.c_max.z - r.c_min.z;
 
-    xyz_t width_x = dim_x / cols - 1;
-    xyz_t width_z = dim_z / rows - 1;
+    xyz_t width_x = dim_x / cols;
+    xyz_t width_z = dim_z / rows;
     
-    xyz_t missing_x = dim_x - cols*width_x - cols; 
-    xyz_t missing_z = dim_z - rows*width_z - rows;
+    xyz_t missing_x = dim_x - cols*width_x; 
+    xyz_t missing_z = dim_z - rows*width_z;
 
     xyz_t height = r.c_max.y - r.c_min.y; 
 
     xyz_t x_offset = r.c_min.x;
     for (int col = 0; col < cols; col++) {
-        xyz_t x_curr_width = width_x + missing_x;
-        missing_x = 0;
+        xyz_t x_curr_width = width_x;
+        if(missing_x > 0){
+            x_curr_width += 1;
+            missing_x -=1;
+        }
+        //xyz_t x_curr_width = width_x + missing_x;
+        //missing_x = 0;
+
         xyz_t curr_missing_z = missing_z;
         xyz_t z_offset = r.c_min.z;
         for (int row = 0; row < rows; row++) {
-            xyz_t z_curr_width = width_z + curr_missing_z;
-            curr_missing_z = 0;
+            xyz_t z_curr_width = width_z;
+            if(curr_missing_z > 0){
+                z_curr_width +=1;
+                curr_missing_z -=1;
+            }
             coord_t c_min = create_coord(x_offset, r.c_min.y, z_offset);
-            coord_t c_max = add_coords(c_min, create_coord(width_x, height, z_curr_width));
+            coord_t c_max = add_coords(c_min, create_coord(x_curr_width-1, height, z_curr_width-1));
             set_grid_region(grid, row, col, make_region(c_min, c_max));
-            z_offset += 1 + z_curr_width;
+            z_offset += z_curr_width;
        }
-       x_offset += 1 + x_curr_width;
+       x_offset += x_curr_width;
     }
     return grid;
 }
