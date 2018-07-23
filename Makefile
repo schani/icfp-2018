@@ -3,4 +3,4 @@ check:
 
 clean:
 	rm -f *~
-	for dir in computing src Bertl; do make -C $dir clean; done
+	for dir in computing src Bertl; do make -C $$dir clean; done
