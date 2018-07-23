@@ -477,14 +477,14 @@ exec_test_bb_flush_and_rebuild(matrix_t *mdl, matrix_t *targetmdl, bot_t *bot1){
         }
     }
 
-
+    mbc.n_bots = 4;
 
     calc_multi_bot_constructor_trace(targetmdl, &mbc);
 
 
 
 
-    mbc.n_bots = 4;
+    
     return merge_bot_commands(mbc);
 
 }
