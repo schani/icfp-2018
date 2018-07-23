@@ -7,7 +7,7 @@ CFLAGS = -Werror -O0 -std=c99 -g \
 LDFLAGS = -lgc -lm
 LDLIBS = $(shell pkg-config --libs glib-2.0)
 
-MAINS = _test _test_default_multi_bot _test_blobs _test_matrixflush _test_bb_flush nbtio_test route_test generate_default_trace run_trace make_plan txt2nbt nbt2txt build
+MAINS = main_program _test _test_default_multi_bot _test_blobs _test_matrixflush _test_bb_flush nbtio_test route_test generate_default_trace run_trace make_plan txt2nbt nbt2txt build
 MAIN_OBJS = $(patsubst %, %.o, $(MAINS))
 
 SRCS = $(filter-out $(MAINS), $(wildcard *.c))
