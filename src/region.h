@@ -7,6 +7,16 @@ typedef struct {
     coord_t c_min, c_max;
 } region_t;
 
+// a contiguous region split into a grid
+typedef struct {
+    int rows;
+    int cols;
+    region_t* regions;
+} region_grid_t;
+
+
+region_t get_grid_region(region_grid_t grid, int row, int col);
+
 #define FOR_EACH_COORD_XZ(c, _y, r) \
     { \
         coord_t c; \
@@ -35,5 +45,7 @@ extend_region(region_t r_in, coord_t c);
 bool 
 region_equal(region_t* r1, region_t* r2);
 
+region_grid_t
+make_region_grid(region_t r, int cols, int rows);
 
 #endif  // __REGION_HELPERS_H
