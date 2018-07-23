@@ -55,7 +55,7 @@ mkdir -p result
 
 mkdir -p tmp
 
-if ./main_program \$* | ./txt2nbt > result/\${1%_*}.nbt > stdout 2> stderr
+if ( cd input-models; ../main_program \$* ) | ./txt2nbt > result/\${1%_*}.nbt
 then
 	touch OKAY
 else
@@ -63,7 +63,7 @@ else
 fi
 
 # save space when collecting
-rm -rf input-models
+#rm -rf input-models
 
 EOF
     chmod +x "$BUILDDIR/run.sh"
