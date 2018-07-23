@@ -64,7 +64,7 @@ split_up_bots(region_grid_t* r, bot_commands_t initial_bot) {
     return mbc;
 }
 
-static int
+int
 gather_bots(multi_bot_commands_t* mbc) {
     move_bot_in_multibot_setting(&mbc->bot_commands[0], sub_coords(create_coord(0,get_bot_pos(&mbc->bot_commands[0]).y,0), get_bot_pos(&mbc->bot_commands[0])));
     move_bot_in_multibot_setting(&mbc->bot_commands[0], create_coord(0, -1, 0));

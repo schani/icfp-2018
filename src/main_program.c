@@ -7,7 +7,8 @@
 #include "state.h"
 #include "strategy_flush_at_once.h"
 #include "default_multi_bots.h"
-extern GArray* exec_test_bb_flush(matrix_t *mdl, bot_t *bot1);
+
+extern GArray* exec_test_bb_flush_and_exit(matrix_t *mdl, bot_t *bot1);
 
 
 int main(int argc, char** argv) {
@@ -31,9 +32,9 @@ int main(int argc, char** argv) {
     char type= argv[1][lenarg1-12];
     char filetype = argv[1][lenarg1-7];
 
-    printf("%c %c\n", type, filetype);
+    //    printf("%c %c\n", type, filetype);
 
-    GArray* cmds, cmds2;
+    GArray* cmds;
 
 
     state_t start;
@@ -47,7 +48,7 @@ int main(int argc, char** argv) {
       if(start.matrix.resolution<=30){
 	cmds = exec_flush_at_once(&start.matrix, &start.bots[0]);
       } else {
-	cmds = exec_test_bb_flush(&start.matrix, &start.bots[0]);
+	cmds = exec_test_bb_flush_and_exit(&start.matrix, &start.bots[0]);
       }
       break;
     case 'R':
@@ -58,7 +59,7 @@ int main(int argc, char** argv) {
       assert(FALSE);
     }
 
-    exit(1);
+   
 
 
 
