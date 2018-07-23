@@ -7,7 +7,8 @@
 #include "move_helper.h"
 #include "multi_bot_helpers.h"
 
-
+extern int
+gather_bots(multi_bot_commands_t* mbc);
 
 static void 
 debug_bb(region_t *bb){
@@ -423,6 +424,70 @@ exec_test_bb_flush(matrix_t *mdl, bot_t *bot1){
 }
 
 
+
+
+
+GArray* 
+exec_test_bb_flush_and_exit(matrix_t *mdl, bot_t *bot1){
+    int quadruple_count = 1;
+    multi_bot_commands_t mbc = make_multi_bot_commands(4 * quadruple_count);
+
+    region_t bb_overall = make_region(create_coord(0,0,0), create_coord(5,5,5));
+
+    mbc.bot_commands[0] = make_bot_commands(*bot1);
+
+
+    int filled_voxels = calc_boundary_box_in_region(mdl, make_region(create_coord(0,0,0), create_coord(mdl->resolution-1, mdl->resolution-1, mdl->resolution-1)), &bb_overall);
+
+
+    /* move initial bot above min of bounding box */
+    coord_t above_min_bb = create_coord(bb_overall.c_min.x, bb_overall.c_max.y +1, bb_overall.c_min.z);
+    move_bot_in_multibot_setting(&mbc.bot_commands[0], sub_coords(above_min_bb, mbc.bot_commands[0].bot.pos) );
+
+	// turn off gravity
+    add_cmd(mbc.bot_commands[0].cmds, flip_cmd());
+
+
+    int cols = (bb_overall.c_max.x - bb_overall.c_min.x) / QLENGTH;
+    if((cols * QLENGTH) < (bb_overall.c_max.x - bb_overall.c_min.x)) {
+        cols += 1;
+    }
+    int rows = (bb_overall.c_max.z - bb_overall.c_min.z) / QLENGTH;
+    if((rows * QLENGTH) < (bb_overall.c_max.z - bb_overall.c_min.z)) {
+        rows += 1;
+    }
+
+
+    
+    region_grid_t rgrid;
+    rgrid = split_region(bb_overall, rows, cols);
+    region_t r0 = get_grid_region(rgrid, 0,0);
+
+
+    bot_spawn_rect(mdl, &mbc, 0, region_get_xsize(r0), region_get_zsize(r0));
+    region_t r;
+    for(int z=0; z<rows; ++z){
+        r = get_grid_region(rgrid, z, 0);
+        move_up_and_to_next_bb_zdirection(mdl, &r, &mbc );
+        for(int x=0; x<cols; ++x){
+            r = get_grid_region(rgrid, z, x);
+            move_up_and_to_next_bb_xdirection(mdl, &r, &mbc );
+            void_a_boundary_box(mdl, &r, &mbc);
+        }
+    }
+    gather_bots(&mbc);
+
+    move_bot_in_multibot_setting(&mbc.bot_commands[0], sub_coords(create_coord(0,get_bot_pos(&mbc.bot_commands[0]).y,0), get_bot_pos(&mbc.bot_commands[0])));
+    move_bot_in_multibot_setting(&mbc.bot_commands[0], sub_coords(create_coord(0,0,0), get_bot_pos(&mbc.bot_commands[0])));
+
+    add_cmd(mbc.bot_commands[0].cmds, flip_cmd());
+    add_cmd(mbc.bot_commands[0].cmds, halt_cmd());
+
+
+    mbc.n_bots = 4;
+    return merge_bot_commands(mbc);
+
+}
 
 
 
