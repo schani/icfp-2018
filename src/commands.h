@@ -7,7 +7,7 @@
 
 
 typedef enum {
-    Halt = 0,
+    Halt = 2,
     Wait,
     Flip,
     SMove,
@@ -184,8 +184,8 @@ fusions_cmd(coord_t nd)
 static inline void
 add_cmd(GArray *cmds, command_t cmd)
 {
-	assert(cmd.type >= 0);
-    assert(cmd.type <= COMMAND_MAX);
+	assert(cmd.type >= Halt);
+        assert(cmd.type <= COMMAND_MAX);
 	g_array_append_val(cmds, cmd);
 }
 

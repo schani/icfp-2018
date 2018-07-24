@@ -4,6 +4,8 @@
 
 #include <glib.h>
 
+// #define DEBUG_TRACE 1
+
 bot_commands_t
 internal_make_bot_commands(bot_t bot, int skipped_rounds) {
     bot_commands_t bc;
@@ -89,15 +91,19 @@ static void
 internal_merge_bot_commands(multi_bot_commands_t mbc, GArray* cmds, int cmd_offset) {
     sort_bot_commands(mbc.bot_commands, mbc.n_bots);
 
-    //printf("==== <merge> =====\n");
+#ifdef DEBUG_TRACE
+    printf("==== <merge> =====\n");
+#endif  // DEBUG_TRACE
 
     while(mbc_get_command(mbc, 0, cmd_offset)->type != Halt) {
         for(int i=0; i<mbc.n_bots; i++) {
             command_t* curr = mbc_get_command(mbc, i, cmd_offset);
             if (curr->type >= 0 && curr->type <= COMMAND_MAX) {
                 add_cmd(cmds, *curr);
-                //printf("%d %d:", i, mbc.bot_commands[i].bot.bid);
-                //print_cmd(*curr);
+#ifdef DEBUG_TRACE
+                printf("%d %d:", i, mbc.bot_commands[i].bot.bid);
+                print_cmd(*curr);
+#endif  // DEBUG_TRACE
                 if(curr->type == FusionS) {
                     mbc = remove_bot(i, mbc);
                     i--;
@@ -107,13 +113,16 @@ internal_merge_bot_commands(multi_bot_commands_t mbc, GArray* cmds, int cmd_offs
             }
         }
         cmd_offset++;
-        //printf("==== %d =====\n", cmd_offset);
+#ifdef DEBUG_TRACE
+        printf("==== %d =====\n", cmd_offset);
+#endif  // DEBUG_TRACE
     }
     add_cmd(cmds, *mbc_get_command(mbc, 0, cmd_offset));
 
-    //print_cmd(*mbc_get_command(mbc, 0, cmd_offset));
-
-    //printf("==== </merge> =====\n");
+#ifdef DEBUG_TRACE
+    print_cmd(*mbc_get_command(mbc, 0, cmd_offset));
+    printf("==== </merge> =====\n");
+#endif  // DEBUG_TRACE
 }
 
 GArray* merge_bot_commands(multi_bot_commands_t mbc) {
@@ -133,9 +142,13 @@ void equalize_multi_bot_commands(multi_bot_commands_t mbc) {
     for (int i = 0; i < mbc.n_bots; i++) {
         max_len = MAX(mbc.bot_commands[i].cmds->len, max_len);
     }
+    command_t wait = wait_cmd();
+    wait.coord1.x = 3;
+    wait.coord1.y = 2;
+    wait.coord1.z = 0;
     for (int i = 0; i < mbc.n_bots; i++) {
         while(mbc.bot_commands[i].cmds->len < max_len) {
-            add_cmd(mbc.bot_commands[i].cmds, wait_cmd());
+            add_cmd(mbc.bot_commands[i].cmds, wait);
         }
     } 
 }
