@@ -39,6 +39,7 @@ void set_bot_pos(bot_commands_t* bc, coord_t coord) {
 GArray* merge_bot_commands(multi_bot_commands_t mbc);
 
 void equalize_multi_bot_commands(multi_bot_commands_t mbc);
+void equalize_some_multi_bot_commands(multi_bot_commands_t mbc, int first_n_bots);
 
 
 #endif  // __MULTI_BOT_HELPERS_H

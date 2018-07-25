@@ -104,7 +104,7 @@ finish_timestep (execution_t *exec) {
     return exec->new_state;
 }
 
-static void
+void
 exec_bot (execution_t *exec, bot_t bot, command_t cmd) {
     coord_t c = bot.pos;
 

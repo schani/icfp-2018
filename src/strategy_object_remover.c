@@ -6,12 +6,8 @@
 #include "region.h"
 #include "move_helper.h"
 #include "multi_bot_helpers.h"
+#include "default_multi_bots.h"
 
-extern int
-gather_bots(multi_bot_commands_t* mbc);
-
-extern void
-calc_multi_bot_constructor_trace(matrix_t *m, multi_bot_commands_t *mbc);
 
 
 static void 
@@ -44,7 +40,6 @@ wait_n_rounds(bot_commands_t *bc, int n){
 
 int
 move_bot_in_multibot_setting(bot_commands_t *bc, coord_t rel_movement){
-
     int steps =	goto_rel_pos(rel_movement, bc->cmds);
     set_bot_pos(bc, add_coords(get_bot_pos(bc), rel_movement));
     return steps;
@@ -540,7 +535,7 @@ exec_test_bb_flush_and_exit(matrix_t *mdl, bot_t *bot1){
             void_a_boundary_box(mdl, &r, &mbc);
         }
     }
-    gather_bots(&mbc);
+    gather_grid_bots(&mbc, mdl->resolution-1, 0);
 
     move_bot_in_multibot_setting(&mbc.bot_commands[0], sub_coords(create_coord(0,get_bot_pos(&mbc.bot_commands[0]).y,0), get_bot_pos(&mbc.bot_commands[0])));
     move_bot_in_multibot_setting(&mbc.bot_commands[0], sub_coords(create_coord(0,0,0), get_bot_pos(&mbc.bot_commands[0])));

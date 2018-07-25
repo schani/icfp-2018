@@ -14,6 +14,7 @@ state_t finish_timestep (execution_t *exec);
 
 state_t exec_timestep (state_t state, command_t *commands);
 
+void exec_bot(execution_t *exec, bot_t bot, command_t cmd);
 matrix_t exec_trace(trace_t trace, matrix_t src_model, task_mode_t mode);
 
 static inline energy_t

@@ -2,7 +2,7 @@
 
 CPPFLAGS = -MMD
 CC = gcc
-CFLAGS = -Werror -O0 -std=c99 -g \
+CFLAGS = -Werror -O3 -std=c99 -g \
 	$(shell pkg-config --cflags glib-2.0)
 LDFLAGS = -lgc -lm
 LDLIBS = $(shell pkg-config --libs glib-2.0)

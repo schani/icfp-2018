@@ -4,7 +4,7 @@
 
 #include <glib.h>
 
-// #define DEBUG_TRACE 1
+#undef DEBUG_TRACE
 
 bot_commands_t
 internal_make_bot_commands(bot_t bot, int skipped_rounds) {
@@ -137,18 +137,23 @@ GArray* merge_bot_commands(multi_bot_commands_t mbc) {
     return cmds;
 }
 
-void equalize_multi_bot_commands(multi_bot_commands_t mbc) {
+void equalize_some_multi_bot_commands(multi_bot_commands_t mbc, int first_n_bots) {
+    assert(first_n_bots <= mbc.n_bots);
     int max_len = 0;
-    for (int i = 0; i < mbc.n_bots; i++) {
+    for (int i = 0; i < first_n_bots; i++) {
         max_len = MAX(mbc.bot_commands[i].cmds->len, max_len);
     }
     command_t wait = wait_cmd();
     wait.coord1.x = 3;
     wait.coord1.y = 2;
     wait.coord1.z = 0;
-    for (int i = 0; i < mbc.n_bots; i++) {
+    for (int i = 0; i < first_n_bots; i++) {
         while(mbc.bot_commands[i].cmds->len < max_len) {
             add_cmd(mbc.bot_commands[i].cmds, wait);
         }
     } 
+}
+
+void equalize_multi_bot_commands(multi_bot_commands_t mbc) {
+     equalize_some_multi_bot_commands(mbc, mbc.n_bots);
 }
